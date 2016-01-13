@@ -1,0 +1,300 @@
+package com.digital.tch.china.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.stereotype.Repository;
+
+import com.digital.tch.china.vo.AccessToken;
+import com.digital.tch.china.vo.Alarm;
+import com.digital.tch.china.vo.AlarmFile;
+import com.digital.tch.china.vo.Notice;
+import com.digital.tch.china.vo.NoticeFile;
+import com.digital.tch.china.vo.ParentQa;
+import com.digital.tch.china.vo.QaSubject;
+import com.digital.tch.china.vo.Schedule;
+import com.digital.tch.china.vo.SearchCondition;
+import com.digital.tch.china.vo.TchAlarm;
+import com.digital.tch.china.vo.User;
+import com.digital.tch.china.vo.WXUserInfo;
+import com.digital.tch.common.dao.CommonDao;
+
+@Repository
+public class TchDao extends CommonDao {
+
+	public User getUserList(User parent) {
+
+		SqlSession session = getSqlSession();
+		User user = null;
+		user = session.selectOne("tch.getUserList", parent);
+		return user;
+	}
+
+	public User getUserInfo(User user) throws Exception {
+
+		SqlSession session = getSqlSession();
+		User info = null;
+		info = session.selectOne("tch.getUserInfo", user);
+		return info;
+	}
+
+	public User getStudentInfo(User user) throws Exception {
+
+		SqlSession session = getSqlSession();
+		User info = null;
+		info = session.selectOne("tch.getStudentInfo", user);
+		return info;
+	}
+
+	public int updateParent(User user) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.update("tch.updateParent", user);
+
+		return cnt;
+	}
+
+	public List<Notice> getNoticeList(SearchCondition condition)
+			throws Exception {
+
+		SqlSession session = getSqlSession();
+		List<Notice> list = null;
+		list = session.selectList("tch.getNoticeList", condition);
+		return list;
+	}
+
+	public List<NoticeFile> getNoticeFileList(Notice notice) throws Exception {
+
+		SqlSession session = getSqlSession();
+		List<NoticeFile> list = null;
+		list = session.selectList("tch.getNoticeFileList", notice);
+		return list;
+	}
+
+	public List<Alarm> getAlarmList(SearchCondition condition) throws Exception {
+
+		SqlSession session = getSqlSession();
+		List<Alarm> list = null;
+		list = session.selectList("tch.getAlarmList", condition);
+		return list;
+	}
+
+	public List<QaSubject> getQaSubjectList(QaSubject subject) throws Exception {
+
+		SqlSession session = getSqlSession();
+		List<QaSubject> list = null;
+		list = session.selectList("tch.getQaSubjectList", subject);
+		return list;
+	}
+
+	public int insertParentQa(ParentQa qa) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.insert("tch.insertParentQa", qa);
+
+		return cnt;
+	}
+
+	public int updateParentQa(ParentQa qa) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.update("tch.updateParentQa", qa);
+
+		return cnt;
+	}
+
+	public int deleteParentQa(ParentQa qa) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.update("tch.deleteParentQa", qa);
+
+		return cnt;
+	}
+
+	public int insertParentQaComment(ParentQa qa) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.insert("tch.insertParentQaComment", qa);
+		getSqlSession().insert("tch.deleteParentQaRead", qa);
+
+		return cnt;
+	}
+
+	public List<ParentQa> getParentQaList(SearchCondition condition)
+			throws Exception {
+
+		SqlSession session = getSqlSession();
+		List<ParentQa> list = null;
+		list = session.selectList("tch.getParentQaList", condition);
+		return list;
+	}
+
+	public List<ParentQa> getPQCommentList(ParentQa qa) throws Exception {
+
+		SqlSession session = getSqlSession();
+		List<ParentQa> list = null;
+		list = session.selectList("tch.getPQCommentList", qa);
+		return list;
+	}
+
+	public List<Schedule> getScheduleList(Schedule sch) throws Exception {
+
+		SqlSession session = getSqlSession();
+		List<Schedule> list = null;
+		list = session.selectList("tch.getScheduleList", sch);
+		return list;
+	}
+
+	public int updateParentQaComment(ParentQa qa) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.update("tch.updateParentQaComment", qa);
+
+		return cnt;
+	}
+
+	public int deleteParentQaComment(ParentQa qa) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.update("tch.deleteParentQaComment", qa);
+
+		return cnt;
+	}
+
+	public int insertNoticeRead(SearchCondition condition) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.insert("tch.insertNoticeRead", condition);
+		return cnt;
+	}
+
+	public int insertAlarmRead(SearchCondition condition) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.insert("tch.insertAlarmRead", condition);
+		return cnt;
+	}
+
+	public int insertParentQaRead(SearchCondition condition) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.insert("tch.insertParentQaRead", condition);
+		return cnt;
+	}
+
+	public List<AlarmFile> getAlarmFileList(Alarm alarm) throws Exception {
+
+		SqlSession session = getSqlSession();
+		List<AlarmFile> list = null;
+		list = session.selectList("tch.getAlarmFileList", alarm);
+		return list;
+	}
+
+	public Notice getNoticeNewCount(SearchCondition cond) throws Exception {
+
+		SqlSession session = getSqlSession();
+		Notice notice = session.selectOne("tch.getNoticeNewCount", cond);
+		return notice;
+	}
+
+	public AccessToken getAccessToken() throws Exception {
+
+		SqlSession session = getSqlSession();
+		AccessToken accessToken = null;
+		accessToken = session.selectOne("tch.getAccessToken");
+
+		return accessToken;
+	}
+
+	public int insertAccessToken(AccessToken accessToken) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.insert("tch.insertAccessToken", accessToken);
+
+		return cnt;
+	}
+
+	public int updateAccessToken(AccessToken accessToken) throws Exception {
+
+		SqlSession session = getSqlSession();
+		int cnt = 0;
+		cnt = session.update("tch.updateAccessToken", accessToken);
+
+		return cnt;
+	}
+
+	public WXUserInfo getWXUserInfo(WXUserInfo wxUserInfo) throws Exception {
+
+		SqlSession session = getSqlSession();
+		WXUserInfo retWXUserInfo = null;
+		retWXUserInfo = session.selectOne("tch.getWXUserInfo", wxUserInfo);
+
+		return retWXUserInfo;
+	}
+
+	public Notice getNoticeInfo(Notice not) throws Exception {
+		SqlSession session = getSqlSession();
+		Notice info = null;
+		info = (Notice) session.selectOne("tch.getNoticeInfo", not);
+		return info;
+	}
+
+	public Alarm getAlarmInfo(Alarm alarm) throws Exception {
+
+		SqlSession session = getSqlSession();
+		Alarm info = null;
+		info = session.selectOne("tch.getAlarmInfo", alarm);
+		return info;
+	}
+
+	public int setAuthorize(WXUserInfo wxUserInfo) {
+		SqlSession session = getSqlSession();
+		WXUserInfo selWXUserInfo = session.selectOne("tch.getWXUserInfo",
+				wxUserInfo);
+		int cnt = 0;
+		if (selWXUserInfo == null) {
+			cnt = session.insert("tch.insertAuthorize", wxUserInfo);
+		} else {
+			cnt = session.update("tch.updateAuthorize", wxUserInfo);
+		}
+		return cnt;
+	}
+	
+	public int getAlarmListBySubjectTeacherTotalCount (Map<String,Object> map){
+		SqlSession session = getSqlSession();
+		int getAlarmListBySubjectTeacherTotalCount = session.selectOne("tch.getAlarmListBySubjectTeacherTotalCount", map);
+		return getAlarmListBySubjectTeacherTotalCount;
+	}
+	
+	public List<TchAlarm>  getAlarmListBySubjectTeacher (Map<String,Object> map){
+		SqlSession session = getSqlSession();
+		List<TchAlarm> getAlarmListBySubjectTeacher = session.selectList("tch.getAlarmListBySubjectTeacher", map);
+		return getAlarmListBySubjectTeacher;
+	}
+
+	public User getUserFromWX(User wxuser) {
+		SqlSession session = getSqlSession();
+		User user = null;
+		user = session.selectOne("tch.getUserFromWX", wxuser);
+		return user;
+	}
+	
+	public List<Notice> getTchNoticeList(Map<String,Object>map){
+		SqlSession session = getSqlSession();
+		List<Notice> getTchNoticeList = session.selectList("tch.getTchNoticeList", map);
+		return getTchNoticeList;
+	}
+
+}

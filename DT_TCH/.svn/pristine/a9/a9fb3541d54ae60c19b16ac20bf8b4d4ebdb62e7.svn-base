@@ -1,0 +1,78 @@
+package com.digital.tch.common.vo;
+
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+import com.digital.tch.common.util.CommonUtil;
+import com.digital.tch.common.vo.Board;
+
+@XmlRootElement(name = "result")
+@XmlType(name = "ResultList", namespace = "com.visangesl.vivasam.common.vo.ResultList", propOrder = { "code", "msg", "result" })
+public class ResultList<T> {
+    private String code;
+    private String msg;
+    
+    List<T> result;
+
+    public String getCode() {
+        return code;
+    }
+
+    @XmlElement(name = "code")
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    @XmlElement(name = "msg")
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+    
+    @XmlElementWrapper(name="result")
+    @XmlElementRefs({
+        @XmlElementRef(name="record", type=Board.class)
+       
+    })
+    public List<T> getResult() {
+        return result;
+    }
+    public void setResult(List<T> result) {
+    	
+        try {
+			this.result = result;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+
+    @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        StringBuffer sb = new StringBuffer();
+        try {
+			sb.append(code);
+			sb.append(CommonUtil.colsep);
+			sb.append(msg);
+			sb.append(CommonUtil.rssep);
+			sb.append(result.toString());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        return sb.toString(); 
+    }
+    
+    
+}

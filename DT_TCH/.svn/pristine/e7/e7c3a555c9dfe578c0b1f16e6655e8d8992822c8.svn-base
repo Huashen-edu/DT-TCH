@@ -1,0 +1,120 @@
+<!-- 코딩 영역 -->
+<section class="pr_edit">
+
+	<div class="row user">
+		<span class="thum">
+			<img class="edit_profile_img" src="" alt="" />
+		</span>
+
+		<dl>
+			<dt>
+				<strong class="edit_parent_name"></strong>
+				<p><span class="edit_student_name"></span> 学生 <span class="edit_student_relation"></span></p>
+			</dt>
+			<dd>
+				<a href="#" class="btn-block btn_edit_profile_img" data-kor="프로필 사진 바꾸기">更换头像</a>
+			</dd>
+		</dl>
+	</div>
+
+	<!-- 입력폼 -->
+	<form name='fmEdit' id='fmEdit' enctype='multipart/form-data' method='post' onsubmit="return false;">
+		<input type='hidden' name='user_id' value=''/>
+		<input type='hidden' name='user_name' value=''/>
+		<input type='hidden' name='birthday' value=''/>
+		<input type='hidden' name='user_email' value=''/>
+		<input type='hidden' name='phone' value=''/>
+		<input type='hidden' name='photo_path' value=''/>
+
+		<div class="row info">
+			<ul>
+				<li>
+					<strong data-kor="아이디">用户名</strong>
+					<p><span class="edit_user_id"></span></p>
+				</li>
+				<li>
+					<strong data-kor="비밀번호">新密码</strong>
+					<p><input type="password" name="user_pw" class="control password" /></p>
+				</li>
+				<li>
+					<strong data-kor="비밀번호 재확인">确认密码</strong>
+					<p><input type="password" class="control re_password"/></p>
+				</li>
+				<li>
+					<strong data-kor="성별">性别</strong>
+					<p>
+						<input type="radio" class="search_app_student_rdo_sex" name="sex" value="M">
+						<label for=""data-kor="남자">男</label>
+
+						<input type="radio" class="search_app_student_rdo_sex" name="sex" value="F">
+						<label for=""data-kor="여자">女</label>
+					</p>
+				</li>
+				<li>
+					<strong data-kor="생년월일">出生日期</strong>
+					<p>
+						<input type="text" class="control birthday b_year"/><span data-kor="년">年</span>
+						<input type="text" class="control birthday b_month"/><span data-kor="월">月</span>
+						<input type="text" class="control birthday b_day"/><span data-kor="일">日</span>
+					</p>
+				</li>
+				<li>
+					<strong data-kor="주소">地址</strong>
+					<p><input type="text" name="address" class="control"/></p>
+				</li>
+				<li>
+					<strong data-kor="이메일">邮箱</strong>
+					<p>
+						<input type="text" class="control email email01"/> @
+						<input type="text" class="control email email02"/>
+					</p>
+				</li>
+				<li>
+					<strong data-kor="핸드폰">手机</strong>
+					<p>
+						<input type="phone" class="control phone phone01"/> -
+						<input type="phone" class="control phone phone02"/> -
+						<input type="phone" class="control phone phone03"/>
+					</p>
+				</li>
+				<li>
+					<strong data-kor="SNS">SNS</strong>
+					<p><input type="text" name="sns" class="control"/></p>
+				</li>
+				<li>
+					<strong data-kor="직업">职业</strong>
+					<p>
+						<select class="control" name="parent_job" id="parent_job">
+
+						</select>
+					</p>
+				</li>
+			</ul>
+		</div>
+	</form>
+	<!-- //입력폼 -->
+
+
+	<div class="group-btn">
+		<a href="#" class="btn-round danger btn_edit_parent" data-kor="개인정보수정">保存修改</a>
+	</div>
+
+</section>
+<!-- //코딩 영역 -->
+
+<!-- alert -->
+<div class="alert" style="display: none;">
+	<p class="desc" data-kor="개인정보 수정을 완료하시겠습니까?">
+		确定<strong>修改个人信息</strong>吗？
+	</p>
+
+	<div class="group-btn">
+		<a href="#" class="btn-round danger" data-kor="확인">确认</a>
+		<a href="#" class="btn-round" data-kor="취소">取消</a>
+	</div>
+</div>
+<!-- //alert -->
+
+
+
+<script src="js/profile.js"></script>

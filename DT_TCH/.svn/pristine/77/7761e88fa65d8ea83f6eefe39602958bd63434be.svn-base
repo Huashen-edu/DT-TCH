@@ -1,0 +1,35 @@
+package com.digital.tch.common.vo;
+
+import java.io.File;
+
+public class FileInfo {
+	private int idx;
+	private String org_file_name;
+	private String real_file_name;
+	private File file;
+	
+	public int getIdx() {
+		return idx;
+	}
+	public void setIdx(int idx) {
+		this.idx = idx;
+	}
+	public String getOrg_file_name() {
+		return org_file_name;
+	}
+	public void setOrg_file_name(String org_file_name) {
+		this.org_file_name = org_file_name;
+	}
+	public String getReal_file_name() {
+		return real_file_name;
+	}
+	public void setReal_file_name(String real_file_name) {
+		this.real_file_name = real_file_name;
+	}
+	public File getFile() {
+		return file;
+	}
+	public void setFile(File file) {
+		this.file = file;
+	}
+}

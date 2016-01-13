@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="widstrong=device-widstrong,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+	<title></title>
+	<link type='text/css' rel="stylesheet" href="../css/reset.css" />
+	<link type='text/css' rel="stylesheet" href="../css/module.css" />
+	<link type='text/css' rel="stylesheet" href="../css/moms.css" />
+</head>
+
+<body>
+<div id="wrapper">
+	<!-- header -->
+	<header id="header" class="sub-show">
+		<!-- top-area -->
+		<div class="top-area">
+			<h1 class="logo">
+				<img src="../images/common/logo.png" alt="DigitalTextbook" />
+			</h1>
+
+			<a href="" class="btn-menu">
+				<img src="../images/common/ui/menu_bg.png" alt="" />
+			</a>
+		</div>
+		<!-- //top-area -->
+
+		<!-- nav -->
+		<nav>
+			<ul class="dep1">
+				<li>
+					<a href="" class="on" data-kor="학생통계">학생통계</a>
+					<ul class="dep2 on">
+						<li><a href="" data-kor="지육" class="on">지육</a></li>
+						<li><a href="" data-kor="미육">미육</a></li>
+						<li><a href="" data-kor="체육">체육</a></li>
+						<li><a href="" data-kor="덕육">덕육</a></li>
+					</ul>
+				</li>
+
+				<li>
+					<a href="" data-kor="알림/공지">알림/공지</a>
+					<ul class="dep2" style="display: none;">
+						<li><a href="" data-kor="전체">전체</a></li>
+						<li><a href="" data-kor="교사">교사</a></li>
+						<li><a href="" data-kor="기관">기관</a></li>
+					</ul>
+				</li>
+
+				<li>
+					<a href="" data-kor="문의/답변">문의/답변</a>
+				</li>
+
+				<li>
+					<a href="" data-kor="시간표">시간표</a>
+				</li>
+			</ul>
+		</nav>
+		<!-- //nav -->
+	</header>
+	<!-- //header -->
+
+	<!-- contain -->
+	<div id="container">
+		<!-- 코딩 영역 -->
+		<section class="time-table">
+
+			<div class="subject-table">
+				<header class="month">6月</header>
+
+				<ul class="week">
+					<li style="width: 20%">时间</li>
+					<li style="width:16%">一</li>
+					<li style="width:16%">二</li>
+					<li style="width:16%">三</li>
+					<li style="width:16%">四</li>
+					<li style="width:16%">五</li>
+				</ul>
+
+				<!--
+					/**과목별 컬러 클래스**/
+
+					ex)td class="math"
+
+					math //수학
+					lang //어문
+					eng  //영어
+					science //물리  취미과학  과학
+					chemical  //화학
+					organism //생물
+					geography  //지리
+					political  //정치  품덕과 사회 / 품덕과 생활
+					history  //역사
+					art  //미술
+					music  //음악
+					physical  //체육
+				 -->
+
+				<div class="schedule">
+					<table>
+						<colgroup>
+							<col width="" />
+							<col width="16%" />
+							<col width="16%" />
+							<col width="16%" />
+							<col width="16%" />
+							<col width="16%" />
+						</colgroup>
+
+						<tr>
+							<th>1교시</th>
+							<td>
+								<p>사회와품덕 </p>
+								3-1
+							</td>
+							<td>
+								<p>과학</p>
+								3-1
+							</td>
+							<td>
+								<p>영어</p>
+								3-1
+							</td>
+							<td>
+								<p>체육 </p>
+								3-1
+							</td>
+							<td>
+								<p>어문 </p>
+								3-1
+							</td>
+						</tr>
+
+						<tr>
+							<th>2교시</th>
+							<td class="art">
+								<p>미술 </p>
+								3-1
+							</td>
+							<td>
+								<p>수학 </p>
+								3-1
+							</td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+
+						<tr>
+							<th>3교시</th>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+
+						<tr>
+							<th>4교시</th>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+
+						<tr>
+							<th>5교시</th>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+
+						<tr>
+							<th>7교시</th>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<th>8교시</th>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+		</section>
+		<!-- //코딩 영역 -->
+
+		<!-- alert -->
+		<div class="alert" style="display: none;">
+			<p class="desc" data-kor="앱을 종료하시겠습니까?">
+				앱을 <strong>종료</strong>하시겠습니까?
+			</p>
+
+			<div class="group-btn">
+				<a href="" class="btn-round danger" data-kor="확인">확인</a>
+				<a href="" class="btn-round" data-kor="취소">취소</a>
+			</div>
+		</div>
+		<!-- //alert -->
+	</div>
+	<!-- //contain -->
+</div>
+
+<!-- side-info -->
+<aside class="side-info" style="display: none;">
+	<header>
+		<div class="row">
+			<a href="" class="btn-round danger" data-kor="앱 종료하기">앱 종료하기</a>
+		</div>
+
+		<div class="row user">
+			<span class="thum">
+				<img src="../images/common/user.jpg" alt="" />
+			</span>
+
+			<dl>
+				<dt>
+					<strong>안영이</strong>
+					<p><span>용미경</span>학생의 어머니</p>
+				</dt>
+				<dd>
+					<a href="" data-kor="로그아웃" class="btn-round-line login">로그아웃</a>
+				</dd>
+			</dl>
+		</div>
+	</header>
+
+	<div class="info">
+		<ul>
+			<li>
+				<strong data-kor="성별">성별</strong>
+				<p>여</p>
+			</li>
+			<li>
+				<strong data-kor="생년월일">생년월일</strong>
+				<p>1981.01.01</p>
+			</li>
+			<li>
+				<strong data-kor="주소">주소</strong>
+				<p>남통시....</p>
+			</li>
+			<li>
+				<strong data-kor="이메일">이메일</strong>
+				<p>tintin@hotmail.com</p>
+			</li>
+			<li>
+				<strong data-kor="핸드폰">핸드폰</strong>
+				<p>010-1111-1111</p>
+			</li>
+			<li>
+				<strong data-kor="SNS">SNS</strong>
+				<p>https://twitter.com/twittlions</p>
+			</li>
+			<li>
+				<strong data-kor="직업">직업</strong>
+				<p>회사원</p>
+			</li>
+		</ul>
+	</div>
+
+	<footer>
+		<a href="" class="setting" data-kor="개인정보수정">개인정보수정</a>
+	</footer>
+</aside>
+<!-- //side-info -->
+</body>
+</html>

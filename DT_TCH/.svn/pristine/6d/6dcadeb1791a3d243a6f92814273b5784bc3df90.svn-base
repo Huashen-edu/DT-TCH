@@ -1,0 +1,22 @@
+package com.digital.tch.common.interceptor;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+
+public class LoginInterceptor extends HandlerInterceptorAdapter {
+	 
+    @Override
+    public boolean preHandle(HttpServletRequest request, 
+            HttpServletResponse response, Object handler) throws Exception {
+        System.err.println("preHandle executed 22222222222222");
+        response.sendRedirect("/check/main.do");
+    	
+    	return false;
+    }
+ 
+    
+ 
+}

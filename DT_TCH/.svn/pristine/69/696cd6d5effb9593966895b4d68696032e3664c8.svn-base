@@ -1,0 +1,7 @@
+package com.digital.tch.common.service;
+
+import com.digital.tch.common.vo.FileInfo;
+
+public interface FileDownloadService {
+	public FileInfo fileDownload(int idx) throws Exception;
+}

@@ -1,0 +1,958 @@
+package com.digital.tch.china.controller;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.digital.tch.china.service.TchService;
+import com.digital.tch.china.util.CommonUtil;
+import com.digital.tch.china.util.WeixinUtil;
+import com.digital.tch.china.vo.AccessToken;
+import com.digital.tch.china.vo.Alarm;
+import com.digital.tch.china.vo.Notice;
+import com.digital.tch.china.vo.NoticeFile;
+import com.digital.tch.china.vo.ParentQa;
+import com.digital.tch.china.vo.QaSubject;
+import com.digital.tch.china.vo.Schedule;
+import com.digital.tch.china.vo.SearchCondition;
+import com.digital.tch.china.vo.TchAlarm;
+import com.digital.tch.china.vo.User;
+import com.digital.tch.china.vo.WXUserInfo;
+import com.digital.tch.common.property.CommonProperties;
+
+@Transactional(propagation = Propagation.SUPPORTS)
+@Controller
+public class TchController {
+	private final Log logger = LogFactory.getLog(this.getClass());
+
+	@Autowired
+	TchService service;
+
+	@Autowired
+	PlatformTransactionManager transactionManager;
+
+	@RequestMapping(value = "/tch/login")
+	@ResponseBody
+	public Model login(Model model, @RequestParam String userId,
+			@RequestParam String pass, HttpServletResponse response,
+			HttpSession session) {
+
+		User parent = new User();
+		parent.setUser_id(userId);
+		parent.setUser_pw(pass);
+
+		try {
+			User user = service.getUserList(parent);
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			if (user != null) {
+//				User student = service.getStudentInfo(parent);
+				model.addAttribute("result", user);
+			} else {
+				model.addAttribute("result", 0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/getUserInfo")
+	@ResponseBody
+	public Model getUserInfo(Model model, @RequestParam String user_id,
+			HttpServletResponse response, HttpSession session) {
+
+		try {
+			User user = new User();
+			user.setUser_id(user_id);
+			User info = service.getUserInfo(user);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", info);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/fileUpload", method = RequestMethod.POST)
+	public @ResponseBody Model fileUpload(Model model,
+			HttpServletRequest request, HttpSession session,
+			@RequestParam String userId, HttpServletResponse response) {
+
+		String fileName = "";
+		int width = 0;
+		int height = 0;
+		String rootPath = "";
+		rootPath = CommonProperties.getProperty("fileUploadRoot");
+
+		String fileStorePath = CommonUtil.getSaveLocation(userId);
+
+		logger.debug("savePath :" + rootPath + fileStorePath);
+		String org_file_name = null;
+		String save_file_name = null;
+		String ext = "";
+		long insertResult = 0;
+
+		try {
+			MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+
+			MultipartFile uploadInputFile = multipartRequest
+					.getFile("uploadInputFile");
+			logger.debug("uploadInputFile:" + uploadInputFile);
+			if (uploadInputFile != null) {
+				if (!new File(rootPath + fileStorePath).exists()) {
+					new File(rootPath + fileStorePath).mkdirs();
+				}
+				org_file_name = uploadInputFile.getOriginalFilename();
+				logger.debug("org_file_name :" + org_file_name);
+				ext = org_file_name.substring(
+						org_file_name.lastIndexOf(".") + 1,
+						org_file_name.length());
+				save_file_name = System.currentTimeMillis() + "." + ext;
+				File destination = new File(rootPath + fileStorePath + "/"
+						+ save_file_name);
+				FileCopyUtils.copy(uploadInputFile.getInputStream(),
+						new FileOutputStream(destination));
+				logger.debug("destination:" + destination);
+
+			}
+			String fileUrl = new StringBuilder("").append("/")
+					.append(CommonProperties.getProperty("uploadContext"))
+					.append("/").append(fileStorePath).append(save_file_name)
+					.toString();
+			// String returnValue="{\"url\" :\"" + fileUrl
+			// +"\" ,\"fileName\":\"" +org_file_name+ "\" ,\"fileType\":\""
+			// +ext+ "\"}";
+
+			logger.debug("returnValue:" + fileUrl);
+			model.addAttribute("result", fileUrl);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result",
+					CommonProperties.getProperty("error.etc.msg"));
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/updateParent")
+	@ResponseBody
+	public Model updateParent(Model model, @RequestParam String user_id,
+			String user_pw, String user_email, String phone, String sex,
+			String photo_path, String birthday, String address, String sns,
+			String parent_job, HttpServletResponse response, HttpSession session) {
+
+		try {
+			User user = new User();
+			user.setUser_id(user_id);
+			user.setUser_pw(user_pw);
+			user.setUser_email(user_email);
+			user.setPhone(phone);
+			user.setSex(sex);
+			user.setPhoto_path(photo_path);
+			user.setBirthday(birthday);
+			user.setAddress(address);
+			user.setSns(sns);
+			user.setParent_job(parent_job);
+			int result = service.updateParent(user);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	/**
+	 * 获取学校公告/老师提醒列表(家长)
+	 * 
+	 * @param model
+	 * @param type
+	 * @param user_id
+	 * @param currentPage
+	 * @param response
+	 * @param session
+	 * @return model
+	 */
+	@RequestMapping(value = "/tch/getNoticeList")
+	@ResponseBody
+	public Model getNoticeList(Model model, @RequestParam String type,
+			@RequestParam String user_id, int currentPage,
+			HttpServletResponse response, HttpSession session) {
+		List<Notice> noticeList = null;
+		List<Alarm> alarmList = null;
+		SearchCondition cond = new SearchCondition();
+		cond.setUser_id(user_id);
+
+		int recordCnt = Integer.parseInt(CommonProperties
+				.getProperty("bbs.record.count"));
+		cond.setCurrentPage((currentPage - 1) * recordCnt);
+		cond.setRecordCnt(recordCnt);
+
+		try {
+			if ("notice".equals(type)) {
+				noticeList = service.getNoticeList(cond);
+				for (Notice notice : noticeList) {
+					notice.setFileList(service.getNoticeFileList(notice));
+				}
+				model.addAttribute("result", noticeList);
+			} else {
+				alarmList = service.getAlarmList(cond);
+				for (Alarm alarm : alarmList) {
+					alarm.setFileList(service.getAlarmFileList(alarm));
+				}
+				model.addAttribute("result", alarmList);
+			}
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/getQaSubjectList")
+	@ResponseBody
+	public Model getQaSubjectList(Model model, @RequestParam String user_id,
+			HttpServletResponse response, HttpSession session) {
+
+		List<QaSubject> list = null;
+		QaSubject cond = new QaSubject();
+		cond.setParent_id(user_id);
+
+		try {
+
+			list = service.getQaSubjectList(cond);
+			model.addAttribute("result", list);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/insertParentQaComment")
+	@ResponseBody
+	public Model insertParentQaComment(Model model, @RequestParam long pqaid,
+			String user_id, String comment, HttpServletResponse response,
+			HttpSession session) {
+
+		try {
+			ParentQa pq = new ParentQa();
+			pq.setPqaid(pqaid);
+			pq.setUser_id(user_id);
+			pq.setComment(comment);
+			int result = service.insertParentQaComment(pq);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/insertParentQa")
+	@ResponseBody
+	public Model insertParentQa(Model model, @RequestParam String parent_id,
+			String contents, String subject, String class_no,
+			String teacher_id, HttpServletResponse response, HttpSession session) {
+
+		try {
+			ParentQa pq = new ParentQa();
+			pq.setParent_id(parent_id);
+			pq.setContents(contents);
+			pq.setClass_no(class_no);
+			pq.setSubject(subject);
+			pq.setTeacher_id(teacher_id);
+			int result = service.insertParentQa(pq);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/updateParentQa")
+	@ResponseBody
+	public Model updateParentQa(Model model, @RequestParam long pqaid,
+			String contents, HttpServletResponse response, HttpSession session) {
+
+		try {
+			ParentQa pq = new ParentQa();
+			pq.setPqaid(pqaid);
+			pq.setContents(contents);
+
+			int result = service.updateParentQa(pq);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/deleteParentQa")
+	@ResponseBody
+	public Model deleteParentQa(Model model, @RequestParam long pqaid,
+			HttpServletResponse response, HttpSession session) {
+
+		try {
+			ParentQa pq = new ParentQa();
+			pq.setPqaid(pqaid);
+
+			int result = service.deleteParentQa(pq);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/getParentQaList")
+	@ResponseBody
+	public Model getParentQaList(Model model, @RequestParam String parent_id,
+			int currentPage, HttpServletResponse response, HttpSession session) {
+		List<ParentQa> list = null;
+		SearchCondition cond = new SearchCondition();
+		cond.setUser_id(parent_id);
+
+		int recordCnt = Integer.parseInt(CommonProperties
+				.getProperty("bbs.record.count"));
+		cond.setCurrentPage((currentPage - 1) * recordCnt);
+		cond.setRecordCnt(recordCnt);
+
+		try {
+			list = service.getParentQaList(cond);
+			model.addAttribute("result", list);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/getPQCommentList")
+	@ResponseBody
+	public Model getPQCommentList(Model model, @RequestParam long pqaid,
+			HttpServletResponse response, HttpSession session) {
+
+		List<ParentQa> list = null;
+		ParentQa pq = new ParentQa();
+		pq.setPqaid(pqaid);
+
+		try {
+
+			list = service.getPQCommentList(pq);
+			model.addAttribute("result", list);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/getScheduleList")
+	@ResponseBody
+	public Model getScheduleList(Model model, @RequestParam String parent_id,
+			HttpServletResponse response, HttpSession session) {
+
+		List<Schedule> list = null;
+		Schedule sch = new Schedule();
+		sch.setParent_id(parent_id);
+
+		try {
+
+			list = service.getScheduleList(sch);
+			model.addAttribute("result", list);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/updateParentQaComment")
+	@ResponseBody
+	public Model updateParentQaComment(Model model,
+			@RequestParam long comment_id, String comment,
+			HttpServletResponse response, HttpSession session) {
+
+		try {
+			ParentQa pq = new ParentQa();
+			pq.setComment_id(comment_id);
+			pq.setComment(comment);
+			int result = service.updateParentQaComment(pq);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/deleteParentQaComment")
+	@ResponseBody
+	public Model deleteParentQaComment(Model model,
+			@RequestParam long comment_id, HttpServletResponse response,
+			HttpSession session) {
+
+		try {
+			ParentQa pq = new ParentQa();
+			pq.setComment_id(comment_id);
+			int result = service.deleteParentQaComment(pq);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	/**
+	 * 点击未读过的帖子
+	 * 
+	 * @param model
+	 * @param key
+	 * @param user_id
+	 * @param type
+	 * @param response
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping(value = "/tch/insertRead")
+	@ResponseBody
+	public Model insertRead(Model model, @RequestParam long key,
+			String user_id, String type, HttpServletResponse response,
+			HttpSession session) {
+
+		try {
+			SearchCondition cond = new SearchCondition();
+			cond.setKey(key);
+			cond.setUser_id(user_id);
+			int result = 0;
+			if ("N".equals(type))
+				result = service.insertNoticeRead(cond);
+			else if ("A".equals(type))
+				result = service.insertAlarmRead(cond);
+			else if ("Q".equals(type))
+				result = service.insertParentQaRead(cond);
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", result);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/getNoticeNewCount")
+	@ResponseBody
+	public Model getNoticeNewCount(Model model, @RequestParam String user_id,
+			HttpServletResponse response, HttpSession session) {
+
+		try {
+			SearchCondition cond = new SearchCondition();
+			cond.setUser_id(user_id);
+			Notice notice = service.getNoticeNewCount(cond);
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", notice);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/getWXUserInfo")
+	@ResponseBody
+	public Model getWXUserInfo(Model model, @RequestParam String code,
+			HttpServletResponse response, HttpSession session) {
+
+		try {
+			// 从DB中获取AccessToken
+			AccessToken accessToken = service.getAccessToken();
+
+			// 调用微信接口获取userid等信息
+			WXUserInfo wxUserInfo = WeixinUtil.getUserInfo(
+					accessToken.getAccess_token(), code);
+			System.out.println("微信返回code:" + code);
+
+			// 判断获取结果
+			if (wxUserInfo == null || "".equals(wxUserInfo.getWx_user_id())) {
+				model.addAttribute("resultcode",
+						CommonProperties.getProperty("error.etc.code"));
+				model.addAttribute("result", wxUserInfo);
+			} else {
+				// 调用数据库获取用户信息
+				WXUserInfo relWXUserInfo = service.getWXUserInfo(wxUserInfo);
+				if (relWXUserInfo == null) {
+					relWXUserInfo = new WXUserInfo();
+					relWXUserInfo.setWx_user_id(wxUserInfo.getWx_user_id());
+					relWXUserInfo.setDevice_id(wxUserInfo.getDevice_id());
+				} else {
+					User user = new User();
+					user.setUser_id(relWXUserInfo.getUser_id());
+					User info = service.getUserInfo(user);
+					if (info != null) {
+						relWXUserInfo.setScid(info.getScid());
+						relWXUserInfo.setSchool_year(info.getSchool_year());
+						relWXUserInfo.setClass_no(info.getClass_no());
+					}
+				}
+				model.addAttribute("resultcode",
+						CommonProperties.getProperty("error.success.code"));
+				model.addAttribute("result", relWXUserInfo);
+
+				System.out.println("获取wxUserInfo成功，wx_user_id:"
+						+ relWXUserInfo.getWx_user_id() + " device_id:"
+						+ relWXUserInfo.getDevice_id());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	@RequestMapping(value = "/tch/setAuthorize")
+	@ResponseBody
+	public Model setAuthorize(Model model, @RequestParam String user_id,
+			@RequestParam String pass, @RequestParam String user_type,
+			@RequestParam String wx_user_id, @RequestParam String device_id,
+			HttpServletResponse response, HttpSession session) {
+
+		WXUserInfo wxUserInfo = new WXUserInfo();
+		wxUserInfo.setUser_id(user_id);
+		wxUserInfo.setUser_type(user_type);
+		wxUserInfo.setWx_user_id(wx_user_id);
+		wxUserInfo.setDevice_id(device_id);
+
+		User parent = new User();
+		parent.setUser_id(user_id);
+		parent.setUser_pw(pass);
+		parent.setUser_type(user_type);
+
+		try {
+			// 判断密码是否正确
+			User user = service.getUserFromWX(parent);
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			// 账号验证成功
+			if (user != null) {
+				// 授权
+				int i = service.setAuthorize(wxUserInfo);
+				if (i == 0) {
+					// 授权失败
+					model.addAttribute("result", "DBfail");
+				} else {
+					// 授权成功
+					model.addAttribute("result", user);
+				}
+			} else {
+				// 密码错误
+				model.addAttribute("result", "fail");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	/**
+	 * 获取提醒列表(教师)
+	 * 
+	 * @param request
+	 * @param response
+	 * @param session
+	 * @param model
+	 * @param scid
+	 * @param user_id
+	 * @param school_year
+	 * @param class_no
+	 * @param currentPage
+	 * @return
+	 */
+
+	@RequestMapping(value = "/tch/getAlarmListBySubjectTeacher")
+	@ResponseBody
+	public Model getAlarmListBySubjectTeacher(HttpServletRequest request,
+			HttpServletResponse response, HttpSession session, Model model,
+			@RequestParam String scid, @RequestParam String user_id,
+			@RequestParam String school_year, @RequestParam String class_no,
+			@RequestParam int currentPage) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("scid", scid);
+		map.put("user_id", user_id);
+		map.put("school_year", school_year);
+		map.put("class_no", class_no);
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("true");// 只是为了跟前端家长端保持一致
+
+		if (scid != null && user_id != null) {
+			try {
+				List<TchAlarm> getAlarmListBySubjectTeacher = null;
+				int recordCnt = Integer.parseInt(CommonProperties
+						.getProperty("bbs.record.count"));
+				int startRowCount = (currentPage - 1) * recordCnt;
+				map.put("currentPage", (startRowCount));
+				map.put("recordCnt", (recordCnt));
+				getAlarmListBySubjectTeacher = service
+						.getAlarmListBySubjectTeacher(map);
+				for (TchAlarm tchAlarm : getAlarmListBySubjectTeacher) {
+					if ("true".equals(tchAlarm.getIsFile())) {
+						tchAlarm.setFileList(list);//true表示存在附件
+					}
+				}
+
+				model.addAttribute("resultcode",
+						CommonProperties.getProperty("error.success.code"));
+				model.addAttribute("result", getAlarmListBySubjectTeacher);
+			} catch (Exception e) {
+				e.printStackTrace();
+				model.addAttribute("resultcode",
+						CommonProperties.getProperty("error.success.code"));
+				model.addAttribute("result", e.getMessage());
+			}
+		} else {
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", "Username or school can not be empty");
+		}
+		return model;
+	}
+
+	/**
+	 * 获取公告详细信息
+	 * 
+	 * @param model
+	 * @param nid
+	 * @param response
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping(value = "/tch/getNoticeInfo")
+	@ResponseBody
+	public Model getNoticeInfo(Model model, @RequestParam long nid,
+			HttpServletResponse response, HttpSession session) {
+		System.err.println(session.getId());
+		try {
+			Notice not = new Notice();
+			not.setNid(nid);
+			Notice notice = service.getNoticeInfo(not);
+			notice.setFileList(service.getNoticeFileList(notice));
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", notice);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+
+	/**
+	 * 获取通知详细信息
+	 * 
+	 * @param model
+	 * @param nid
+	 * @param response
+	 * @param session
+	 * @return
+	 */
+	@RequestMapping(value = "/tch/getAlarmInfo")
+	@ResponseBody
+	public Model getAlarmInfo(Model model, @RequestParam int aid,
+			HttpServletResponse response, HttpSession session) {
+
+		try {
+			Alarm alm = new Alarm();
+			alm.setAid(aid);
+			Alarm alarm = service.getAlarmInfo(alm);
+			alarm.setFileList(service.getAlarmFileList(alarm));
+
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.success.code"));
+			model.addAttribute("result", alarm);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+			model.addAttribute("resultcode",
+					CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", e.getMessage());
+		}
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		return model;
+	}
+	
+	/**
+	 * 
+	 * getAddressBookStudentsList(获取学生列表)
+	 * @param model
+	 * @param scid (学校id)
+	 * @param school_year (年份)
+	 * @param class_no (班级id)
+	 * @param response
+	 * @param session
+	 * @return 
+	 *Model
+	 * @exception 
+	 * @since  1.0.0
+	 */
+	@RequestMapping(value = "/tch/getAddressBookStudentsList", method = RequestMethod.POST)
+	@ResponseBody
+	public Model getAddressBookStudentsList(Model model,@RequestParam String scid,
+			@RequestParam String school_year, @RequestParam String class_no, HttpServletResponse response,HttpSession session) {
+
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("scid", scid);
+		map.put("school_year", school_year);
+		map.put("class_no", class_no);
+		
+		if(scid != null && school_year != null && class_no != null){
+			try {
+				List<User> getAddressBookStudentsList = service.getAddressBookStudentsList(map);
+				model.addAttribute("resultcode", CommonProperties.getProperty("error.success.code"));
+				model.addAttribute("result", getAddressBookStudentsList);
+			} catch (Exception e) {
+				e.printStackTrace();
+				model.addAttribute("resultcode", CommonProperties.getProperty("error.dberror.code"));
+				model.addAttribute("result", CommonProperties.getProperty("error.dberror.msg"));
+			}
+		}else{
+			model.addAttribute("resultcode", CommonProperties.getProperty("error.jsonparse.code"));
+			model.addAttribute("result", CommonProperties.getProperty("error.jsonparse.msg"));
+		}
+		
+		return model;
+	}
+	
+	/**
+	 * 获取老师提醒列表
+	 * @param request
+	 * @param response
+	 * @param session
+	 * @param model
+	 * @param user_id
+	 * @param target
+	 * @param scid
+	 * @param currentPage
+	 * @return
+	 */
+	
+	@RequestMapping(value = "/tch/getTchNoticeList")
+	@ResponseBody
+	public Model getTchNoticeList(HttpServletRequest request,
+			HttpServletResponse response, HttpSession session, Model model,
+			@RequestParam String user_id, @RequestParam String target,@RequestParam String scid,@RequestParam int currentPage){
+		Map<String,Object> map = new HashMap<String,Object>();
+		map.put("scid", scid);
+		map.put("user_id",user_id);
+		map.put("target",target);
+		
+		ArrayList<NoticeFile> list = new ArrayList<NoticeFile>();
+		NoticeFile nf = new NoticeFile();
+		nf.setFilename("true");
+		list.add(nf);// 只是为了跟前端家长端保持一致
+		
+		if(scid != null && user_id != null){
+			try {
+				int recordCnt = Integer.parseInt(CommonProperties
+						.getProperty("bbs.record.count"));
+				int startRowCount = (currentPage - 1) * recordCnt;
+				map.put("currentPage", (startRowCount));
+				map.put("recordCnt", (recordCnt));
+					
+				List<Notice> getTchNoticeList = null;
+				getTchNoticeList = service.getTchNoticeList(map);
+				for (Notice notice : getTchNoticeList) {
+					if ("true".equals(notice.getFile_added())) {
+						notice.setFileList(list);//表示存在附件
+					}
+				}
+					
+				model.addAttribute("resultcode", CommonProperties.getProperty("error.success.code"));
+				model.addAttribute("result", getTchNoticeList);
+			} catch (Exception e) {
+				e.printStackTrace();
+				model.addAttribute("resultcode", CommonProperties.getProperty("error.etc.code"));
+				model.addAttribute("result", e.getMessage());
+			}
+		}else{
+			model.addAttribute("resultcode", CommonProperties.getProperty("error.etc.code"));
+			model.addAttribute("result", "Username or school can not be empty");
+		}
+		return model;
+	}
+	
+
+}

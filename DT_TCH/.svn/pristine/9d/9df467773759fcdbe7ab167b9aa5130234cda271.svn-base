@@ -1,0 +1,49 @@
+package com.digital.tch.china.util;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+
+
+
+public class EditorUtil {
+	public static String getSaveLocation(String sessionId){
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(getTodayYear()).append("/")
+		.append(getTodayMonth()).append("/")
+		.append(getTodayDay()).append("/");
+		
+		
+		return sb.toString();
+	}
+	
+	public static String getTodayYear() {
+        Date dt = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+        return sdf.format(dt);
+    }
+
+    public static String getTodayMonth() {
+        Date dt = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM");
+        return sdf.format(dt);
+    }
+
+    public static String getTodayDay() {
+        Date dt = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd");
+        return sdf.format(dt);
+    }
+	public static String getRequestHost(HttpServletRequest request){
+		return new StringBuilder("http://").append(request.getServerName()).append(":").append(request.getServerPort()).toString();		
+	}
+	
+	public static boolean isWindows(){
+	   String OS = System.getProperty("os.name");
+	   return  OS.startsWith("Windows");
+	}
+	
+	
+}

@@ -1,0 +1,482 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Insert title here</title>
+<script src="jquery-1.9.1.js" type="text/javascript"></script>
+
+<script src="jquery-form.js" type="text/javascript"></script>
+
+<script src="util.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){
+	
+	
+});
+function selectChange(target){
+	if ( target == "login" ){
+		var result = "" + login;
+		$("#function").val(result);
+		login();
+	}else if ( target == "getUserInfo" ){
+		var result = "" + getUserInfo;
+		$("#function").val(result);
+		getUserInfo();
+	}else if ( target == "updateParent" ){
+		var result = "" + updateParent;
+		$("#function").val(result);
+		updateParent();
+	}else if ( target == "getNoticeList" ){
+		var result = "" + getNoticeList;
+		$("#function").val(result);
+		getNoticeList();
+	}else if ( target == "getQaSubjectList" ){
+		var result = "" + getQaSubjectList;
+		$("#function").val(result);
+		getQaSubjectList();
+	}else if ( target == "insertParentQa" ){
+		var result = "" + insertParentQa;
+		$("#function").val(result);
+		insertParentQa();
+	}else if ( target == "insertParentQaComment" ){
+		var result = "" + insertParentQaComment;
+		$("#function").val(result);
+		insertParentQaComment();
+	}else if ( target == "getParentQaList" ){
+		var result = "" + getParentQaList;
+		$("#function").val(result);
+		getParentQaList();
+	}else if ( target == "getPQCommentList" ){
+		var result = "" + getPQCommentList;
+		$("#function").val(result);
+		getPQCommentList();
+	}else if ( target == "getScheduleList" ){
+		var result = "" + getScheduleList;
+		$("#function").val(result);
+		getScheduleList();
+	}else if ( target == "updateParentQaComment" ){
+		var result = "" + updateParentQaComment;
+		$("#function").val(result);
+		updateParentQaComment();
+	}else if ( target == "deleteParentQaComment" ){
+		var result = "" + deleteParentQaComment;
+		$("#function").val(result);
+		deleteParentQaComment();
+	}else if ( target == "updateParentQa" ){
+		var result = "" + updateParentQa;
+		$("#function").val(result);
+		updateParentQa();
+	}else if ( target == "deleteParentQa" ){
+		var result = "" + deleteParentQa;
+		$("#function").val(result);
+		deleteParentQa();
+	}else if ( target == "insertRead" ){
+		var result = "" + insertRead;
+		$("#function").val(result);
+		insertRead();
+	}else if ( target == "getNoticeNewCount" ){
+		var result = "" + getNoticeNewCount;
+		$("#function").val(result);
+		getNoticeNewCount();
+	}
+	
+		
+	
+}
+
+function login(){
+	var reqData = {
+			userId : "pms04",
+			pass : "1234"
+	};
+	var ret = getAjaxPostData("/moms/login.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		for(var i=0 ; i < obj.length ; i++){
+			str += JSON.stringify(obj[i]) + "\n"; 
+			$("#result").val(str);
+		}
+	}
+}
+function getUserInfo(){
+	var reqData = {
+			user_id : "p007"
+	};
+	var ret = getAjaxPostData("/moms/getUserInfo.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		$("#result").val(obj);
+		
+	}
+}
+
+function uploadContents(){
+	//$("#uploadHiddenForm").submit();
+var uploadHiddenForm = $("#uploadHiddenForm");
+	
+	uploadHiddenForm.ajaxForm({
+		type:'post',
+		dataType: 'json',
+		crossDomain: true,
+		beforeSend : function(){
+			//$.progressBar($("#progressbar"));
+			console.log("beforeSubmit");
+		},
+		/* uploadProgress: function(event, position, total, percentComplete) {
+	        var percentVal = percentComplete + '%';
+	        console.log(percentVal);
+	        
+	    }, */
+		success : function(data){
+			console.log(data);
+		},
+		error : function(){
+			console.log("error");
+		}
+	}).submit();
+}
+
+function updateParent(){
+	var reqData = {
+			user_id:"p007",
+			user_pw:"1234",
+			user_name:"ppppp",
+			user_email:"a@co.kr",
+			phone:"010",
+			sex:"M",
+			photo_path:"000",
+			birthday:"2000-06-06",
+			address:"99999999999999999",
+			sns:"666",
+			parent_job:"01"   // 코드표 참조		
+	};
+	var ret = getAjaxPostData("/moms/updateParent.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+/*
+ * 
+ type 
+ notice : 공지사항
+ alarm : 알림
+ */
+function getNoticeList(){
+	var reqData = {
+			type : "alarm",
+			user_id : "pms04",
+			currentPage : "1"
+			
+	};
+	var ret = getAjaxPostData("/moms/getNoticeList.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		for(var i=0 ; i < obj.length ; i++){
+			str += JSON.stringify(obj[i]) + "\n"; 
+			$("#result").val(str);
+		}
+	}
+	
+}
+/*
+ * 
+ 질문 작성시 
+ 
+ 과목 리스트 가져오기
+ */
+function getQaSubjectList(){
+	var reqData = {
+			user_id : "p007"
+			
+	};
+	var ret = getAjaxPostData("/moms/getQaSubjectList.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		for(var i=0 ; i < obj.length ; i++){
+			str += JSON.stringify(obj[i]) + "\n"; 
+			$("#result").val(str);
+		}
+	}
+	
+}
+
+function insertParentQa(){
+	var reqData = {
+			parent_id:"p007",
+			contents:"질문하빈다.",
+			subject:"11",
+			class_no:"01",
+			teacher_id:"t1"
+	};
+	var ret = getAjaxPostData("/moms/insertParentQa.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+/*
+ * 
+ user_id : 선생님 또는 학부모 아이디
+ */
+function insertParentQaComment(){
+	var reqData = {
+			user_id:"t1",
+			comment:"3333.",
+			pqaid:4
+	};
+	var ret = getAjaxPostData("/moms/insertParentQaComment.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+
+function getParentQaList(){
+	var reqData = {
+			parent_id : "p007",
+			currentPage : "1"
+			
+	};
+	var ret = getAjaxPostData("/moms/getParentQaList.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		for(var i=0 ; i < obj.length ; i++){
+			str += JSON.stringify(obj[i]) + "\n"; 
+			$("#result").val(str);
+		}
+	}
+	
+}
+function getPQCommentList(){
+	var reqData = {
+			pqaid : 3
+			
+	};
+	var ret = getAjaxPostData("/moms/getPQCommentList.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		for(var i=0 ; i < obj.length ; i++){
+			str += JSON.stringify(obj[i]) + "\n"; 
+			$("#result").val(str);
+		}
+	}
+	
+}
+function getScheduleList(){
+	var reqData = {
+			parent_id : "pms01"
+			
+	};
+	var ret = getAjaxPostData("/moms/getScheduleList.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		for(var i=0 ; i < obj.length ; i++){
+			str += JSON.stringify(obj[i]) + "\n"; 
+			$("#result").val(str);
+		}
+	}
+	
+}
+function updateParentQaComment(){
+	var reqData = {
+			comment_id:5,
+			comment:"update update"
+	};
+	var ret = getAjaxPostData("/moms/updateParentQaComment.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+function deleteParentQaComment(){
+	var reqData = {
+			comment_id:6
+	};
+	var ret = getAjaxPostData("/moms/deleteParentQaComment.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+
+function updateParentQa(){
+	var reqData = {
+			pqaid:9,
+			contents:"dddddddd"
+	};
+	var ret = getAjaxPostData("/moms/updateParentQa.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+function deleteParentQa(){
+	var reqData = {
+			pqaid:10
+	};
+	var ret = getAjaxPostData("/moms/deleteParentQa.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+/*
+ * 
+ type
+ N : notice
+ A : Alarm
+ Q : Parent QA
+ */
+function insertRead(){
+	var reqData = {
+			type:"Q",
+			key:3,
+			user_id:"p007"
+	};
+	var ret = getAjaxPostData("/moms/insertRead.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+
+
+function getNoticeNewCount(){
+	var reqData = {
+			user_id:"p007"
+	};
+	var ret = getAjaxPostData("/moms/getNoticeNewCount.do", reqData);
+	$("#request").val(JSON.stringify(reqData));
+	console.log(ret);
+	if ( ret.resultcode="0000"){
+		var obj = ret.result;
+		var str="";
+		
+		$("#result").val(obj);
+		
+	}
+	
+}
+</script>
+</head>
+<body>
+<div>
+	<select onchange="selectChange(this.value)">
+	    <option value="">함수를 선택하세요.</option>
+	    <option value="login">login</option>
+	    <option value="getUserInfo">getUserInfo</option>
+	    <option value="updateParent">updateParent</option>
+	    <option value="getNoticeList">getNoticeList</option>
+ 		<option value="getQaSubjectList">getQaSubjectList</option>
+ 		<option value="insertParentQa">insertParentQa</option>
+ 		<option value="insertParentQaComment">insertParentQaComment</option>
+ 		<option value="getParentQaList">getParentQaList</option>
+ 		<option value="getPQCommentList">getPQCommentList</option>
+ 		<option value="getScheduleList">getScheduleList</option>
+ 		<option value="updateParentQaComment">updateParentQaComment</option>
+ 		<option value="deleteParentQaComment">deleteParentQaComment</option>
+ 		<option value="updateParentQa">updateParentQa</option>
+ 		<option value="deleteParentQa">deleteParentQa</option>
+ 		<option value="insertRead">insertRead</option>
+ 		<option value="getNoticeNewCount">getNoticeNewCount</option>
+ 		
+	</select>
+	<form id="uploadHiddenForm" name="uploadHiddenForm"  method="post" action="/moms/fileUpload.do" enctype="multipart/form-data">
+		<input type="file" id="uploadInputFile" onchange="uploadContents()" name="uploadInputFile" />
+		<input type="hidden" name="userId" value="p007"/>
+		<input style="display:none;" type="submit" id="uploadSubmit" value="upload"/>
+	</form>
+</div>	
+
+<textarea rows=20 cols=120 id="function">
+	
+</textarea><br>
+
+<h1>Request</h1><br>
+<textarea rows=2 cols=120 id="request">
+	
+</textarea><br>
+<h1>Result</h1><br>
+<textarea rows=10 cols=120 id="result">
+	
+</textarea>
+
+
+</body>
+</html>

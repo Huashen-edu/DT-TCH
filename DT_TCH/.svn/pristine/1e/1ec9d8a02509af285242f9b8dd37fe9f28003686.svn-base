@@ -1,0 +1,109 @@
+<!-- qna list -->
+<section class="qna" id="container" style="overflow:hidden;">
+    <div class="list-area">
+		<div class="group-refresh">
+			<!-- 질문 버튼 -->
+			<a href="#" class="btn-block btn-faq" href="#" data-kor="질문">提问</a>
+			<!--<a href="#" class="btn-block refresh btn_list_refresh" data-kor="새로고침" style="display:none;"></a>-->
+		</div>
+
+		<p class="msg-box emptyMsg" data-kor="질문하신 내역이 없습니다" style="display:none;">无提问信息。</p>
+
+        <!-- 리스트 영역 -->
+        <div class="originalWrap">
+
+        </div>
+        <!-- //리스트 영역 -->
+    </div>
+</section>
+<!-- //qna list -->
+
+
+<!-- qna write -->
+<section class="qna_write" style="display:none;">
+    <div class="select-area">
+        <p classs="desc" data-kor="물어볼 선생님을 선택하세요">请选择教师。</p>
+
+        <!-- 선생님 선택 -->
+        <div class="tch-list">
+            <ul>
+
+            </ul>
+        </div>
+        <!-- //선생님 선택 -->
+
+		<!-- placeholder = 내용을 입력해주세요 -->
+        <textarea class="textarea" id="write_contents" placeholder="请输入内容。"></textarea>
+
+		<div id="emoji_result"></div>
+    </div>
+
+	<div class="group-btn">
+		<a class="btn-round danger half btn_qna_register" data-kor="등록" >确认</a>
+		<a class="btn-round half btn_qna_cancel" data-kor="취소">取消</a>
+	</div>
+</section>
+<!-- //qna write -->
+
+
+
+<!-- qna chat -->
+<section class="qna_chat" style="display:none;">
+	<!-- 리스트 상단 -->
+	<header class="board-header">
+		<a href="#" class="btn-block btn_goback_list" data-kor="목록으로">返回目录</a>
+	</header>
+	<!-- //리스트 상단 -->
+
+	<div class="chat-area">
+		<dl class="qna_box view">
+			<!-- 최상단에 과목과 날짜 고정 -->
+			<dt>
+				<ul>
+					<li class="subject re_subject"></li>
+					<li class="date re_root_date"></li>
+				</ul>
+			</dt>
+			<!-- //최상단에 과목과 날짜 고정 -->
+
+
+			<dd>
+				<!-- question_temp -->
+				<div class="question_temp">
+					<!--
+						댓글 영역
+					-->
+					<div class="itemWrap">
+
+					</div>
+
+					<!-- 재문의 폼 -->
+					<div class="inquiry" style="display:none;">
+						<!-- placeholder = 내용을 입력해주세요 -->
+						<textarea class="textarea" id="re_qna_contents" placeholder="请输入内容。"></textarea>
+
+						<div class="group-btn">
+							<a class="btn-round danger half btn_re_qna_regist" data-kor="등록">确认</a>
+							<a class="btn-round half btn_re_qna_cancel" data-kor="취소" >取消</a>
+						</div>
+					</div>
+					<!-- //재문의 폼 -->
+
+					<!-- 하단 버튼 -->
+					<div class="group-btn right btn_bottom_wrapper">
+						<a class="btn-block btn_re_qna_write" data-kor="다시 문의 하기">再次提问</a>
+						<a class="btn-block btn_re_qna_edit" data-kor="수정">修改</a>
+						<a class="btn-block btn_re_qna_delete" data-kor="삭제">删除</a>
+						<!-- <a class="btn-block btn_re_qna_deleteComment" data-kor="삭제">删除</a> -->
+					</div>
+					<!-- //하단 버튼 -->
+				</div>
+				<!-- //question_temp -->
+			</dd>
+		</dl>
+	</div>
+</section>
+<!-- //qna chat -->
+
+<a href="#" class="top"></a>
+<script src="js/qna.js"></script>

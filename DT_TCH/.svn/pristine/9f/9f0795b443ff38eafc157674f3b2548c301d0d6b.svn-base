@@ -1,0 +1,32 @@
+package com.digital.tch.china.vo;
+
+public class NoticeFile {
+	private String filename;
+	private String filepath;
+	private long nfid;
+	public long getNfid() {
+		return nfid;
+	}
+	public void setNfid(long nfid) {
+		this.nfid = nfid;
+	}
+	public long getNid() {
+		return nid;
+	}
+	public void setNid(long nid) {
+		this.nid = nid;
+	}
+	private long nid;
+	public String getFilename() {
+		return filename;
+	}
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+	public String getFilepath() {
+		return filepath;
+	}
+	public void setFilepath(String filepath) {
+		this.filepath = filepath;
+	}
+}

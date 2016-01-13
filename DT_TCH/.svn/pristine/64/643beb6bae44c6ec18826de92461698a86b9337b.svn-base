@@ -1,0 +1,39 @@
+package com.digital.tch.china.vo;
+
+public class QaSubject {
+	private String parent_id;
+	public String getParent_id() {
+		return parent_id;
+	}
+	public void setParent_id(String parent_id) {
+		this.parent_id = parent_id;
+	}
+	public String getTeacher_id() {
+		return teacher_id;
+	}
+	public void setTeacher_id(String teacher_id) {
+		this.teacher_id = teacher_id;
+	}
+	public String getSubject() {
+		return subject;
+	}
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+	public String getSubject_name() {
+		return subject_name;
+	}
+	public void setSubject_name(String subject_name) {
+		this.subject_name = subject_name;
+	}
+	private String teacher_id;
+	private String subject;
+	private String subject_name;
+	private String class_no;
+	public String getClass_no() {
+		return class_no;
+	}
+	public void setClass_no(String class_no) {
+		this.class_no = class_no;
+	}
+}

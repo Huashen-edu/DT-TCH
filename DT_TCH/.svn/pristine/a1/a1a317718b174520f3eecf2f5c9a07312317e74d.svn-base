@@ -1,0 +1,303 @@
+
+$(function() {	
+
+	momsSubTempFrame.wrapper = $('.ctContainer');
+	momsSubTempFrame.wrapper.tabs = $('.tab-wrapper');
+	momsSubTempFrame.menuBgWrapper = $('#menuDim');
+
+
+	////////////////// POLLING 정의 ///////////////////
+
+	//메인 화면 Polling
+	momsSubTempFrame.polling = {};
+	momsSubTempFrame.polling.start = function(){
+		moms.polling.setOption({
+			url : apiUrl+"getNoticeNewCount.do" , 
+			params : { 
+				user_id : localStorage.getItem('MOMS_id')
+			}
+		});
+		moms.polling.bind = momsSubTempFrame.polling.bind;
+		//moms.polling.start();
+	};
+	momsSubTempFrame.polling.stop = function(){
+		moms.polling.stop();
+	};
+	//메인 화면 Polling 함수 바인딩
+	momsSubTempFrame.polling.bind = function(result){
+		var data = JSON.parse(result);
+		
+		if(data.resultcode != '0000'){
+			return;
+		}
+		var noticeAlarm = (data.result.alarm_cnt + data.result.notice_cnt) || 0,
+			qna = data.result.qa_cnt || 0;
+		
+		if(noticeAlarm > 0 && noticeAlarm < 100){
+			momsSubTempFrame.wrapper.find("#cts_notice_count").text(noticeAlarm);
+			momsSubTempFrame.wrapper.find("#cts_notice_count").addClass('pollingOn');
+		}else if(noticeAlarm >= 100){
+			momsSubTempFrame.wrapper.find("#cts_notice_count").text('+');
+			momsSubTempFrame.wrapper.find("#cts_notice_count").addClass('pollingOn');
+		}else{
+			momsSubTempFrame.wrapper.find("#cts_notice_count").text(0);
+			momsSubTempFrame.wrapper.find("#cts_notice_count").removeClass('pollingOn');
+		}
+
+		if(qna > 0 && qna < 100){
+			momsSubTempFrame.wrapper.find("#cts_qna_count").text(qna);
+			momsSubTempFrame.wrapper.find("#cts_qna_count").addClass('pollingOn');
+		}else if(qna >= 100){
+			momsSubTempFrame.wrapper.find("#cts_qna_count").text('+');
+			momsSubTempFrame.wrapper.find("#cts_qna_count").addClass('pollingOn');
+		}else{
+			momsSubTempFrame.wrapper.find("#cts_qna_count").text(0);
+			momsSubTempFrame.wrapper.find("#cts_qna_count").removeClass('pollingOn');
+		}
+	};
+	///////////////// -- POLLING 정의 ///////////////////
+
+
+	// init
+	momsSubTempFrame.init = function(){
+		if(window.jline){
+			window.jline.toggleNavigationBar(true);
+		}
+		
+		momsSubTempFrame.eventBind();
+		momsSubTempFrame.DefaultInfo();
+		momsSubTempFrame.wrapper.find('.tabs_dep1').eq(0).click();
+
+		// 폴링 start
+		momsSubTempFrame.polling.start();
+	}
+
+	
+	// 처음 정보 세팅
+	momsSubTempFrame.DefaultInfo = function(){
+		console.log('기본정보 set');
+
+		var params = "user_id="+localStorage.getItem('MOMS_id');
+
+		getAjaxPostData('getUserInfo.do?', params , true , function(data){
+			console.log(data)
+			var response = data;
+
+			if(response.resultcode == '0000'){
+				var parent_sex = '';
+				var parent_relation = '';
+				if(response.result.sex == 'M'){
+					parent_sex = '男'; //남자
+					parent_relation = '父';
+				}else{
+					parent_sex = '女'; //여자
+					parent_relation = '母';
+				}
+
+				// 프로필
+				if(response.result.photo_path){
+					momsSubTempFrame.wrapper.find('.sm_profile_img').attr('src',lmsUrl+response.result.photo_path);
+				}else{
+					momsSubTempFrame.wrapper.find('.sm_profile_img').attr('src',defaultProfileImgPath);
+				}
+
+				momsSubTempFrame.wrapper.find('.sm_parent_name').text(response.result.user_name);				// 이름
+				momsSubTempFrame.wrapper.find('.sm_student_name').text(response.result.student_name);			// 학생이름
+				momsSubTempFrame.wrapper.find('.sm_relation').text(parent_relation);							// 관계
+				momsSubTempFrame.wrapper.find('.sm_parent_sex').text(parent_sex);								// 성별
+				momsSubTempFrame.wrapper.find('.sm_parent_birthday').text(cts_Date(response.result.birthday));	// 생년월일
+				momsSubTempFrame.wrapper.find('.sm_parent_address').text(response.result.address);				// 주소
+				momsSubTempFrame.wrapper.find('.sm_parent_email').text(response.result.user_email);				// 이메일
+				momsSubTempFrame.wrapper.find('.sm_parent_phone').text(phone_format(response.result.phone));	// 핸드폰
+				momsSubTempFrame.wrapper.find('.sm_parent_sns').text(response.result.sns);						// SNS
+				momsSubTempFrame.wrapper.find('.sm_parent_job').text(response.result.parent_job_name);			// 직업
+			}else{
+				momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('用户信息连接失败。'); //사용자 정보를 불러오지 못했습니다.
+				momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				return;
+			}
+		});
+	}
+	
+
+
+	// event bind
+	momsSubTempFrame.eventBind = function(){
+		// dep1 tabs
+		momsSubTempFrame.wrapper.find('.tabs_dep1').on(BIND_EVENT_TYPE,function(){
+			var $this = $(this);
+
+			momsSubTempFrame.wrapper.find('.dep2').hide();
+			momsSubTempFrame.wrapper.attr('data-type' , $this.attr('data-tabs'));
+
+			momsSubTempFrame.wrapper.find('.tabs_dep1').removeClass('on');
+			$this.addClass('on');
+
+			$this.parent().find('.dep2').show();
+			$this.parent().find('.dep2').addClass('on');
+			$this.parent().find('.dep2').css({'display' : '-webkit-box'});
+
+			if($this.parent().find('.dep2').children().length != 0){
+				momsSubTempFrame.wrapper.find('#header').addClass('sub-show');
+				$this.parent().find('.dep2 .tabs_dep2:first').click();
+			}else{
+				momsSubTempFrame.wrapper.find('#header').removeClass('sub-show');
+				momsPageLoader(
+					"contents/"+$this.attr('data-tabs')+".html",
+					"#content_container",
+					function(){
+					
+					},
+					function(){
+					}
+				);//momsPageLoader
+			}
+		});
+
+
+		// dep2 tabs
+		momsSubTempFrame.wrapper.find('.tabs_dep2').on(BIND_EVENT_TYPE,function(){
+			var $this = $(this);
+			momsSubTempFrame.wrapper.find('.tabs_dep2').removeClass('on');
+			$this.addClass('on');
+			console.debug("---> " , momsSubTempFrame.wrapper.find('.tabs_dep1.on').attr('data-tabs'));
+			momsPageLoader(
+				"contents/"+momsSubTempFrame.wrapper.find('.tabs_dep1.on').attr('data-tabs')+".html",
+				"#content_container",
+				function(){
+					try{
+						eval( $this.data("callback") );
+					}catch(e){
+						console.warn("Eval Callback error");
+					}
+					
+				},
+				function(){
+					
+				});
+		});
+
+
+		// 개인정보 수정 버튼
+		momsSubTempFrame.wrapper.find('.btn_sm_myInfo_update').on(BIND_EVENT_TYPE,function(){
+			momsSubTempFrame.wrapper.find('.menubtn').click();
+			momsPageLoader("contents/"+$(this).attr('data-tabs')+".html","#content_container",function(){
+				momsSubTempFrame.wrapper.find('#header').removeClass('sub-show')
+					.andSelf().find('.tabs_dep1').removeClass('on')
+					.andSelf().find('.dep2').removeClass('on').hide()
+					.andSelf().find('.tabs_dep2').removeClass('on');
+			},function(){});
+		});
+
+
+		// 로그아웃
+		momsSubTempFrame.wrapper.find('.btn_sm_logout').on(BIND_EVENT_TYPE,function(){
+			momsSubTempFrame.wrapper.find('#main_default_alert .desc').html('确定要<strong>退出</strong>吗？'); //로그아웃 하시겠습니까?
+			momsSubTempFrame.wrapper.find('#main_default_alert').attr('data-type','logout');
+			momsSubTempFrame.wrapper.find('#main_default_alert').fadeIn();
+		});
+
+		// 앱종료
+		momsSubTempFrame.wrapper.find('.btn_sm_exit').on(BIND_EVENT_TYPE,function(){
+			momsSubTempFrame.wrapper.find('#main_default_alert .desc').html('确定要<strong>结束</strong>程序吗？'); //앱을 <strong>종료</strong>하시겠습니까?
+			momsSubTempFrame.wrapper.find('#main_default_alert').attr('data-type','finish');
+			momsSubTempFrame.wrapper.find('#main_default_alert').fadeIn();
+		});
+
+		// 사이드메뉴 버튼
+		momsSubTempFrame.wrapper.find('.menubtn').on(BIND_EVENT_TYPE,function(){
+			var $this = $(this);
+			if($this.hasClass("on")){
+				$this.removeClass("on");
+				$('html, body').css({"overflow" : ""});					// scroll work
+			}else{
+				momsSubTempFrame.sideInfoSet(function(){
+					$this.addClass("on");
+					$('html, body').css({"overflow" : "hidden"});		// scroll NOT work
+				});		// 사이드메뉴 setting
+			}
+		});
+
+		// 다이얼로그 ok
+		momsSubTempFrame.wrapper.find('.main_default_alert_ok').on(BIND_EVENT_TYPE,function(){
+			// 로그아웃
+			var flag = momsSubTempFrame.wrapper.find('#main_default_alert').attr('data-type')
+			if( flag == 'logout'){
+				if(window.jline){
+					localStorage.clear();
+					localStorage.setItem('logout','Y');
+					momsSubTempFrame.polling.stop();			// polling stop
+					window.jline.logout("http://jlinesoft.com:4040/login.html");
+				}else{
+					momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('加载失败。'); //오류가 발생하였습니다.
+					momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				}
+			}else if(flag == "deleteQnA"){ //삭제
+				var params = {
+					pqaid : momsSubTempFrame.qna.chatWrapper.find('.questionItem:last').attr('data-pqaid')
+				}
+				getAjaxPostData("deleteParentQa.do?", params, true, function(data){
+					console.log(data)
+					if(data.resultcode == '0000'){
+						console.log('질문삭제성공');
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('提问已被删除。'); //질문이 삭제되었습니다.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+
+						momsSubTempFrame.qna.sFlag = false;
+						momsSubTempFrame.qna.listInit("init");
+						momsSubTempFrame.qna.chatWrapper.fadeOut(300,function(){
+							momsSubTempFrame.qna.listWrapper.fadeIn(300);
+						});
+					}else{
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。');  //처리에 실패했습니다.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+						return;
+					}
+				});
+			}else{	// 앱종료
+				if(window.jline){
+					momsSubTempFrame.polling.stop();			// polling stop
+					localStorage.clear();
+					window.jline.exitApplication();
+				}else{
+					momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('加载失败。'); //오류가 발생하였습니다.
+					momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				}
+			}
+			momsSubTempFrame.wrapper.find('#main_default_alert').fadeOut();
+		});
+
+		// 다이얼로그 cancel
+		momsSubTempFrame.wrapper.find('.main_default_alert_cancel').on(BIND_EVENT_TYPE,function(){
+			momsSubTempFrame.wrapper.find('.alert').fadeOut();
+		});
+
+		// 처리실패 ok
+		momsSubTempFrame.wrapper.find('.main_fail_alert_ok').on(BIND_EVENT_TYPE,function(){
+			momsSubTempFrame.wrapper.find('.alert').fadeOut();
+		});
+
+		// 하단 TOP 버튼 SCROLL ANIMATION
+		momsSubTempFrame.wrapper.on(BIND_EVENT_TYPE, '.top' ,function(){
+			$('html, body').animate({'scrollTop' : '0px'}, 400);
+		});
+
+		// Menu Close
+		momsSubTempFrame.menuBgWrapper.on(BIND_EVENT_TYPE,function(e){
+			if(momsSubTempFrame.wrapper.find('.menubtn').hasClass('on')){
+				momsSubTempFrame.wrapper.find('.menubtn').click();
+			}else{
+				return;
+			}
+		});
+	}	
+
+
+	// 사이드메뉴 정보 set
+	momsSubTempFrame.sideInfoSet = function(callback){
+		callback();
+	}
+
+	momsSubTempFrame.init();
+});
+	
