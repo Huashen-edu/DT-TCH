@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="widstrong=device-widstrong,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+	<title></title>
+	<link type='text/css' rel="stylesheet" href="../css/reset.css" />
+	<link type='text/css' rel="stylesheet" href="../css/module.css" />
+	<link type='text/css' rel="stylesheet" href="../css/moms.css" />
+</head>
+
+<body>
+<div id="wrapper">
+	<!-- header -->
+	<header id="header">
+		<!-- top-area -->
+		<div class="top-area">
+			<h1 class="logo">
+				<img src="../images/common/logo.png" alt="DigitalTextbook" />
+			</h1>
+
+			<a href="" class="btn-menu">
+				<img src="../images/common/ui/menu_bg.png" alt="" />
+			</a>
+		</div>
+		<!-- //top-area -->
+
+		<!-- nav -->
+		<nav>
+			<ul class="dep1">
+				<li>
+					<a href="" data-kor="학생통계">학생통계</a>
+					<ul class="dep2 on">
+						<li><a href="" data-kor="지육" class="on">지육</a></li>
+						<li><a href="" data-kor="미육">미육</a></li>
+						<li><a href="" data-kor="체육">체육</a></li>
+						<li><a href="" data-kor="덕육">덕육</a></li>
+					</ul>
+				</li>
+
+				<li>
+					<a href="" data-kor="알림/공지">알림/공지</a>
+					<ul class="dep2" style="display: none;">
+						<li><a href="" data-kor="전체">전체</a></li>
+						<li><a href="" data-kor="교사">교사</a></li>
+						<li><a href="" data-kor="기관">기관</a></li>
+					</ul>
+				</li>
+
+				<li>
+					<a href="" data-kor="문의/답변" class="on">문의/답변</a>
+				</li>
+
+				<li>
+					<a href="" data-kor="시간표">시간표</a>
+				</li>
+			</ul>
+		</nav>
+		<!-- //nav -->
+	</header>
+	<!-- //header -->
+
+	<!-- contain -->
+	<div id="container">
+		<!-- 코딩 영역 -->
+		<section class="qna ">
+			<!-- 리스트 상단 -->
+			<header class="board-header">
+				<a href="" class="btn-block" data-kor="목록으로">목록으로</a>
+			</header>
+			<!-- //리스트 상단 -->
+
+			<!-- 리스트 -->
+			<div class="list-area">
+				<!-- 리스트에 사용 -->
+				<dl class="qna_box">
+					<dt>
+						<ul>
+							<li class="subject">과학</li>
+							<li class="progress">
+								<mark class="marking waiting">답변대기중</mark>
+								<!-- <mark class="marking complete">답변완료</mark> -->
+							</li>
+							<li class="date">2015-01-23</li>
+						</ul>
+					</dt>
+					<dd>
+						과학수업이 어렵다고 합니다.
+						우리 딸이 과학 수업이 어렵다고 합니다...
+					</dd>
+				</dl>
+				<!-- //리스트에 사용 -->
+
+				<!-- 리스트에 항목을 클릭해서 들어 갔을 때 -->
+				<dl class="qna_box view">
+					<dt>
+						<ul>
+							<li class="subject">과학</li>
+							<li class="date">2015-01-23</li>
+						</ul>
+					</dt>
+					<dd>
+
+						<!-- question_temp -->
+						<div class="question_temp">
+							<p class="q-stit">
+								과학수업이 어렵다고 합니다. 우리 딸이 과학 수업이 어렵다고 합니다...
+							</p>
+
+							<div class="answer-box">
+								<!-- 답변 대기중 -->
+								<div class="wait page-center">
+									<p data-kor="답변대기중입니다">답변대기중입니다</p>
+								</div>
+								<!-- //답변 대기중 -->
+
+								<!-- 답변 등록 -->
+								<div class="info">
+									<span class="thum"><img src="../images/common/user.jpg" alt=""></span>
+									<strong class="name"><i>선은정</i>선생님</strong>
+									<i class="date">2015-01-23</i>
+								</div>
+
+								<p class="answer">
+									다음 시간부터 사례 위주 수업 예정입니다
+									이론 수업보다 쉽고 재미있게 진행됩니다.
+									다음 시간부터 사례 위주 수업 예정입니다
+									이론 수업보다 쉽고 재미있게 진행됩니다.
+									다음 시간부터 사례 위주 수업 예정입니다
+								</p>
+								<!-- //답변 등록 -->
+							</div>
+
+							<!-- 재문의 -->
+							<div class="inquiry" >
+								<textarea class="textarea"></textarea>
+
+								<div class="group-btn">
+									<a href="" class="btn-round danger full">등록</a>
+								</div>
+							</div>
+							<!-- //재문의 -->
+
+							<div class="group-btn right">
+								<a href="" class="btn-block" data-kor="다시 문의 하기">다시 문의 하기</a>
+								<a href="" class="btn-block" data-kor="수정">수정</a>
+								<a href="" class="btn-block" data-kor="삭제">삭제</a>
+							</div>
+						</div>
+						<!-- //question_temp -->
+
+						<!-- question_temp -->
+
+						<div class="question_temp">
+							<div class="write-date">2015-01-23</div>
+
+							<p class="q-stit">
+								과학수업이 어렵다고 합니다. 우리 딸이 과학 수업이 어렵다고 합니다...
+							</p>
+
+							<div class="answer-box">
+								<!-- 답변 대기중 -->
+								<div class="wait page-center">
+									<p data-kor="답변대기중입니다">답변대기중입니다</p>
+								</div>
+								<!-- //답변 대기중 -->
+
+								<!-- 답변 등록 -->
+								<div class="info">
+									<span class="thum"><img src="../images/common/user.jpg" alt=""></span>
+									<strong class="name"><i>선은정</i>선생님</strong>
+									<i class="date">2015-01-23</i>
+								</div>
+
+								<p class="answer">
+									다음 시간부터 사례 위주 수업 예정입니다
+									이론 수업보다 쉽고 재미있게 진행됩니다.
+									다음 시간부터 사례 위주 수업 예정입니다
+									이론 수업보다 쉽고 재미있게 진행됩니다.
+									다음 시간부터 사례 위주 수업 예정입니다
+								</p>
+								<!-- //답변 등록 -->
+							</div>
+
+							<!-- 재문의 -->
+							<div class="inquiry" >
+								<textarea class="textarea"></textarea>
+
+								<div class="group-btn">
+									<a href="" class="btn-round danger full">등록</a>
+								</div>
+							</div>
+							<!-- //재문의 -->
+
+							<div class="group-btn right">
+								<a href="" class="btn-block" data-kor="다시 문의 하기">다시 문의 하기</a>
+								<a href="" class="btn-block" data-kor="수정">수정</a>
+								<a href="" class="btn-block" data-kor="삭제">삭제</a>
+							</div>
+						</div>
+						<!-- //question_temp -->
+
+					</dd>
+				</dl>
+				<!-- //리스트에 항목을 클릭해서 들어 갔을 때 -->
+
+
+
+
+			</div>
+			<!-- //리스트 -->
+
+		</section>
+
+		<a href="" class="btn-faq">
+			<img src="../images/common/btn/btn_question.png" alt="질문" data-kor="질문" />
+		</a>
+		<!-- //코딩 영역 -->
+
+		<!-- alert -->
+		<div class="alert" style="display: none;">
+			<p class="desc" data-kor="앱을 종료하시겠습니까?">
+				앱을 <strong>종료</strong>하시겠습니까?
+			</p>
+
+			<div class="group-btn">
+				<a href="" class="btn-round danger" data-kor="확인">확인</a>
+				<a href="" class="btn-round" data-kor="취소">취소</a>
+			</div>
+		</div>
+		<!-- //alert -->
+	</div>
+	<!-- //contain -->
+</div>
+
+<!-- side-info -->
+<aside class="side-info" style="display: none;">
+	<header>
+		<div class="row">
+			<a href="" class="btn-round danger" data-kor="앱 종료하기">앱 종료하기</a>
+		</div>
+
+		<div class="row user">
+			<span class="thum">
+				<img src="../images/common/user.jpg" alt="" />
+			</span>
+
+			<dl>
+				<dt>
+					<strong>안영이</strong>
+					<p><span>용미경</span>학생의 어머니</p>
+				</dt>
+				<dd>
+					<a href="" data-kor="로그아웃" class="btn-round-line login">로그아웃</a>
+				</dd>
+			</dl>
+		</div>
+	</header>
+
+	<div class="info">
+		<ul>
+			<li>
+				<strong data-kor="성별">성별</strong>
+				<p>여</p>
+			</li>
+			<li>
+				<strong data-kor="생년월일">생년월일</strong>
+				<p>1981.01.01</p>
+			</li>
+			<li>
+				<strong data-kor="주소">주소</strong>
+				<p>남통시....</p>
+			</li>
+			<li>
+				<strong data-kor="이메일">이메일</strong>
+				<p>tintin@hotmail.com</p>
+			</li>
+			<li>
+				<strong data-kor="핸드폰">핸드폰</strong>
+				<p>010-1111-1111</p>
+			</li>
+			<li>
+				<strong data-kor="SNS">SNS</strong>
+				<p>https://twitter.com/twittlions</p>
+			</li>
+			<li>
+				<strong data-kor="직업">직업</strong>
+				<p>회사원</p>
+			</li>
+		</ul>
+	</div>
+
+	<footer>
+		<a href="" class="setting" data-kor="개인정보수정">개인정보수정</a>
+	</footer>
+</aside>
+<!-- //side-info -->
+
+<a href="#" class="top"></a>
+</body>
+</html>

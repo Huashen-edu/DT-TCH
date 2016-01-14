@@ -1,0 +1,183 @@
+
+$(function() {
+	momsSubTempFrame.profile.profileWrap = $('.pr_edit');
+
+	// init
+	momsSubTempFrame.profile.init = function(){
+		// event bind
+		momsSubTempFrame.profile.eventBind();
+
+		// 직업 set
+		momsSubTempFrame.profile.selectSet();
+
+		// 초기 정보 set
+		momsSubTempFrame.profile.infoSet();
+	}
+
+	// select set - 직업
+	momsSubTempFrame.profile.selectSet = function(){
+		var selectDom = '';
+		momsSubTempFrame.profile.profileWrap.find('#parent_job').empty();
+
+		var reqData = {
+			codeGroup : "33"
+		};
+
+		LMSgetAjaxPostData("getCodeList.do?", reqData, false, function(data){
+			if(data.resultcode == '0000'){
+				for(var i=0; i < data.result.length; i++){
+					selectDom += '<option value="'+data.result[i].code_id+'">'+data.result[i].code_name+'</option>';
+				}
+
+				momsSubTempFrame.profile.profileWrap.find('#parent_job').html(selectDom);
+			}else{
+				momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。');			// 처리에 실패했습니다.
+				momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				return;
+			}
+		});
+	}
+
+
+	// 정보 setting
+	momsSubTempFrame.profile.infoSet = function(){
+		var params = {
+			user_id : localStorage.getItem('MOMS_id')
+		}
+
+		getAjaxPostData('getUserInfo.do?', params , true, function(data){
+			console.log(data)
+			var response = data;
+
+			if(response.resultcode == '0000'){
+				var parent_relation = '';
+				// 학생과 관계 설정
+				if(response.result.sex == 'M'){
+					parent_relation = '父';
+				}else{
+					parent_relation = '母';
+				}
+
+				var birth_array = cts_split((cts_split((response.result.birthday), ' '))[0], '-'),
+					email_array = cts_split((response.result.user_email), '@'),
+					phone = cts_split(phone_format(response.result.phone), '-');
+
+				// 프로필 설정
+				if(response.result.photo_path){
+					momsSubTempFrame.profile.profileWrap.find('.edit_profile_img').attr('src',lmsUrl+response.result.photo_path);
+				}else{
+					momsSubTempFrame.profile.profileWrap.find('.edit_profile_img').attr('src',defaultProfileImgPath);
+				}
+
+				momsSubTempFrame.profile.profileWrap.find('.edit_parent_name').text(response.result.user_name);				// 학부모이름
+				momsSubTempFrame.profile.profileWrap.find('input[name=user_name]').val(response.result.user_name);
+				momsSubTempFrame.profile.profileWrap.find('.edit_student_name').text(response.result.student_name);			// 학생이름
+				momsSubTempFrame.profile.profileWrap.find('.edit_student_relation').text(parent_relation);					// 학생과관계
+				
+				var euid_length = response.result.user_id.length;						// 아이디 길이
+				var edit_user_id = response.result.user_id.substring(1,euid_length)		// 아이디 처음 p 삭제	
+				
+				momsSubTempFrame.profile.profileWrap.find('.edit_user_id').text(edit_user_id);
+				momsSubTempFrame.profile.profileWrap.find('input[name=user_id]').val(response.result.user_id);				// 학부모아이디
+				momsSubTempFrame.profile.profileWrap.find('input[name=user_pw]').val(response.result.user_pw);				// 학부모비밀번호
+				momsSubTempFrame.profile.profileWrap.find('.re_password').val(response.result.user_pw);						// 학부모비밀번호재확인
+
+				// 성별
+				momsSubTempFrame.profile.profileWrap.find('input[name=sex]').each(function(){
+					if($(this).val() == response.result.sex){
+						$(this).prop("checked",true);
+					}
+				});
+
+				momsSubTempFrame.profile.profileWrap.find('.b_year').val(birth_array[0]);									// year
+				momsSubTempFrame.profile.profileWrap.find('.b_month').val(birth_array[1]);									// month
+				momsSubTempFrame.profile.profileWrap.find('.b_day').val(birth_array[2]);									// day
+				momsSubTempFrame.profile.profileWrap.find('.email01').val(email_array[0]);									// 이메일1
+				momsSubTempFrame.profile.profileWrap.find('.email02').val(email_array[1]);									// 이메일2
+				momsSubTempFrame.profile.profileWrap.find('.phone01').val(phone[0]);										// 휴대폰번호1
+				momsSubTempFrame.profile.profileWrap.find('.phone02').val(phone[1]);										// 휴대폰번호2
+				momsSubTempFrame.profile.profileWrap.find('.phone03').val(phone[2]);										// 휴대폰번호3
+				momsSubTempFrame.profile.profileWrap.find('input[name=address]').val(response.result.address);				// 학부모주소
+				momsSubTempFrame.profile.profileWrap.find('input[name=sns]').val(response.result.sns);						// 학부모SNS
+				momsSubTempFrame.profile.profileWrap.find('#parent_job').val(response.result.parent_job);					// 학부모 직업
+			}else{
+				momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('用户信息连接失败。'); //사용자 정보를<br />불러오지 못했습니다.
+				momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				return;
+			}
+		});
+	}
+
+	// event bind
+	momsSubTempFrame.profile.eventBind = function(){
+		// 개인정보수정완료
+		momsSubTempFrame.profile.profileWrap.find('.btn_edit_parent').on(BIND_EVENT_TYPE,function(){
+			// 비밀번호와 비밀번호 확인이 다를경우
+			if(momsSubTempFrame.profile.profileWrap.find('.password').val() != momsSubTempFrame.profile.profileWrap.find('.re_password').val()){
+				momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('<strong>密码</strong>不正确。'); //<strong>비밀번호</strong>가 다릅니다.
+				momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				return;
+			}
+
+			// 생년월일
+			if(momsSubTempFrame.profile.profileWrap.find('.b_year').val() && momsSubTempFrame.profile.profileWrap.find('.b_month').val() && momsSubTempFrame.profile.profileWrap.find('.b_day').val()){
+				var birthday = momsSubTempFrame.profile.profileWrap.find('.b_year').val() + '-' + momsSubTempFrame.profile.profileWrap.find('.b_month').val() + '-' + momsSubTempFrame.profile.profileWrap.find('.b_day').val();
+				momsSubTempFrame.profile.profileWrap.find('input[name=birthday]').val(birthday);
+			}else{
+				momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('请正确输入<br/><strong>出生日期</strong>。'); //<strong>생년월일</strong>을<br/>올바르게 입력하세요.
+				momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				return;
+			}
+
+			// 이메일형식
+			if(momsSubTempFrame.profile.profileWrap.find('.email01').val() && momsSubTempFrame.profile.profileWrap.find('.email02').val()){
+				var user_email = momsSubTempFrame.profile.profileWrap.find('.email01').val() + '@' + momsSubTempFrame.profile.profileWrap.find('.email02').val();
+				momsSubTempFrame.profile.profileWrap.find('input[name=user_email]').val(user_email);
+			}else{
+				momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('请正确输入<br/><strong>邮件</strong>。'); //<strong>이메일</strong>을<br/>올바르게 입력하세요.
+				momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				return;
+			}
+
+			// 연락처
+			var parant_phone = momsSubTempFrame.profile.profileWrap.find('.phone01').val()+momsSubTempFrame.profile.profileWrap.find('.phone02').val()+momsSubTempFrame.profile.profileWrap.find('.phone03').val();
+			momsSubTempFrame.profile.profileWrap.find('input[name=phone]').val(parant_phone);
+
+			var params = $('#fmEdit').serialize();
+			console.log(params);
+
+			getAjaxPostData('updateParent.do?', params , false, function(data){
+				var response = data;
+
+				if(response.resultcode == '0000'){
+					console.log('성공!');
+					
+					// 개인정보 수정에 오기전에 보고있던 Tab 화면으로 돌아감
+					switch (momsSubTempFrame.wrapper.attr('data-type'))
+					{
+						case 'statistic':
+							momsSubTempFrame.wrapper.find('.tabs_dep1').eq(0).click();
+							break;
+						case 'noticeAlarm':
+							momsSubTempFrame.wrapper.find('.tabs_dep1').eq(1).click();
+							break;
+						case 'qna':
+							momsSubTempFrame.wrapper.find('.tabs_dep1').eq(2).click();
+							break;
+						case 'timetable':
+							momsSubTempFrame.wrapper.find('.tabs_dep1').eq(3).click();
+							break;
+						default:
+							break;
+					}
+				}else{
+					momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。'); //처리에 실패하였습니다.
+					momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+					return;
+				}
+			});
+		});
+	}
+
+	momsSubTempFrame.profile.init();
+});

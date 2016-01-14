@@ -1,0 +1,54 @@
+$(function(){
+	var menuwidth  = 270; // pixel value for sliding menu width
+	var menuspeed  = 400; // milliseconds for sliding menu animation time
+
+	var $bdy       = $('body');
+	var $container = $('.ctContainer');
+	var $menuForm  = $('#ctsDrawerMenu');
+	var $menuFormH = $('#ctsDrawerMenu header');
+	var $menuFormB = $('#ctsDrawerMenu .info');
+	var $menuFormF = $('#ctsDrawerMenu footer');
+	var $menuDim   = $('#menuDim');
+	var negwidth   = "-"+menuwidth+"px";
+	var poswidth   = menuwidth+"px";
+  
+	$('.menubtn').on(BIND_EVENT_TYPE,function(e){
+		if($bdy.hasClass('openmenu')) {
+			jsAnimateMenu('close');
+		} else {
+			jsAnimateMenu('open');
+		}
+	});
+  
+	$('a[href="#"]').on(BIND_EVENT_TYPE, function(e){
+		e.preventDefault();
+	});
+  
+	function jsAnimateMenu(tog) {
+		if(tog == 'open') {
+			$bdy.addClass('openmenu');
+			$menuDim.show();
+			$container.css({'margin-right': negwidth, 'margin-left': poswidth});
+			$menuDim.animate({marginRight: negwidth, marginLeft: poswidth}, menuspeed);
+			$menuForm.css({'width': poswidth});
+
+			//$container.animate({marginRight: negwidth, marginLeft: poswidth}, menuspeed);
+			//$menuForm.animate({width: poswidth}, menuspeed);
+		}
+
+		if(tog == 'close') {
+			$bdy.removeClass('openmenu');
+			$container.css({'margin-right': "0", 'margin-left': "0"});
+			$menuDim.animate({marginRight: "0", marginLeft: "0"}, menuspeed);
+			$menuDim.hide();
+			$menuForm.css({width: "0"});
+
+			//$container.animate({marginRight: "0", marginLeft: "0"}, menuspeed);
+			//$menuForm.animate({width: "0"}, menuspeed);
+		}
+	}
+
+	$menuFormH.css({"width":menuwidth+"px"});
+	$menuFormB.css({"width":menuwidth+"px"});
+	$menuFormF.css({"width":menuwidth+"px"});
+});

@@ -1,0 +1,149 @@
+@charset "UTF-8";
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video { margin: 0; padding: 0; border: 0; font: inherit; font-size: 100%; vertical-align: baseline; }
+
+html { line-height: 1; }
+
+ol, ul { list-style: none; }
+
+table { border-collapse: collapse; border-spacing: 0; }
+
+caption, th, td { text-align: left; font-weight: normal; vertical-align: middle; }
+
+q, blockquote { quotes: none; }
+
+q:before, q:after, blockquote:before, blockquote:after { content: ""; content: none; }
+
+a img { border: none; }
+
+article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary { display: block; }
+
+@font-face { font-family: nbg; src: local(※), url("fonts/yahei.woff") format("woff"); }
+/* variables */
+/* Reset */
+* { box-sizing: border-box; }
+
+html, body { width: 100%; height: 100%; /*-webkit-backface-visibility: hidden;*/ text-decoration: none; }
+
+body { font-family: "yahei", Apple SD Gothic Neo, Sans-serif; font-size: 12px; color: #000; /*-webkit-tap-highlight-color: transparent;*/ }
+
+input[type="button"], button * { vertical-align: middle; }
+
+button { border: none; background-color: transparent; padding: 0; background-color: transparent; }
+
+button.btn { height: 26px; padding: 0 16px; border-radius: 5px; color: #fff; background-color: #78828c; font-family: 'yahei'; letter-spacing: -1px; }
+
+button.radius { height: 34px; line-height: 34px !important; border-radius: 17px; color: #fff; text-align: center; background-color: #fff; }
+
+button.danger { background-color: #ef4743; }
+
+button.ico_pen:before { content: ''; display: inline-block; vertical-align: middle; width: 18px; height: 18px; margin: 0 10px 0 0; background: url("../images/common/btn/ico_pen.png") 0 0 no-repeat; }
+
+input, select { font-family: 'yahei'; }
+
+input[type="radio"], input[type="checkbox"] { vertical-align: middle; margin-top: 0 !important; width: 14px; height: 14px; background-color: #fff; -webkit-appearance: none; border: 1px solid #ccc; }
+
+input[type="radio"]:checked, input[type="checkbox"]:checked { background: #fff url("../images/common/icon/ico_checked.png") 50% 50% no-repeat; }
+
+input[type="text"] { border: 1px solid #e1e1e1; line-height: 28px; padding: 0 6px; }
+
+input[type="text"].calendar { padding: 0 0 0 34px !important; background: #fff url("../images/common/icon/date.png") 8px 6px no-repeat; }
+
+select { -webkit-appearance: none; border: none; line-height: 26px; padding: 0 25px 0 15px; border: 1px solid #e1e1e1; color: #fff; background: #fff url("../images/common/select_arrow.png") right 50% no-repeat; color: #000; }
+
+legend { display: none; }
+
+a { color: #000; text-decoration: none; }
+
+i, em { font-style: normal; }
+
+table { width: 100%; table-layout: fixed; }
+
+table th { text-align: center; }
+
+table td * { vertical-align: middle; }
+
+.aLeft { text-align: left; }
+
+.scr::-webkit-scrollbar { width: 8px; height: 5px; -webkit-appearance: none; }
+
+.scr::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.6); }
+
+/* 과목 머릿말 */
+mark[class^="mark_"] { display: inline-block; line-height: 22px; padding: 0 8px; }
+
+mark[class^="mark_"][class*="sci"] { background: #ddefe5; }
+
+mark[class^="mark_"].teacher { background-color: #dae2f3; }
+
+mark[class^="mark_"].student { background-color: #ddefe5; }
+
+/* 라운드 버튼: ex)목록으로(하늘색)*/
+.btn_round { display: inline-block; height: 24px; line-height: 24px; padding: 0 12px; border-radius: 5px; border: 1px solid #51b9f1; color: #51b9f1; }
+
+@font-face { font-family: nbg; src: local(※), url("fonts/NanumBarunGothic.woff") format("woff"); }
+/* variables */
+/* Reset */
+* { box-sizing: border-box; }
+
+input[type="button"], button * { vertical-align: middle; }
+
+button, a { display: inline-block; border: none; background-color: transparent; padding: 0; background-color: transparent; }
+button.btn, a.btn { height: 26px; line-height: 26px; padding: 0 16px; text-align: center; border-radius: 5px; color: #fff; background-color: #78828c; font-family: 'yahei'; letter-spacing: -1px; }
+button.radius, a.radius { height: 34px; line-height: 34px !important; border-radius: 17px; color: #fff; text-align: center; background-color: #fff; }
+button.radius_border, a.radius_border { height: 34px; line-height: 28px !important; border-radius: 17px; border: 3px solid #ef4743; background-color: #fff !important; color: #78828c; }
+button.danger, a.danger { background-color: #ef4743; }
+button.ico_pen:before, a.ico_pen:before { content: ''; display: inline-block; vertical-align: middle; width: 18px; height: 18px; margin: 0 10px 0 0; background: url("../images/common/btn/ico_pen.png") 0 0 no-repeat; }
+button.ico_arrow:before, a.ico_arrow:before { content: ''; display: inline-block; vertical-align: middle; width: 7px; height: 9px; margin: 0 10px 0 0; background: url("../images/common/btn/ico_arrow.png") 0 0 no-repeat; }
+button.ico_folder:before, a.ico_folder:before { content: ''; display: inline-block; vertical-align: middle; width: 16px; height: 12px; margin: -2px 5px 0 0; background: url("../images/common/icon/ico_folder.png") 0 0 no-repeat; }
+
+input, select { margin: 0; padding: 0; font-family: 'yahei'; vertical-align: middle; }
+
+input[type="radio"], input[type="checkbox"] { vertical-align: middle; margin-top: 0 !important; width: 14px; height: 14px; background-color: #fff; -webkit-appearance: none; border: 1px solid #ccc; }
+input[type="radio"]:checked, input[type="checkbox"]:checked { background: #fff url("../images/common/icon/ico_checked.png") 50% 50% no-repeat; }
+
+input[type="text"] { border: 1px solid #e1e1e1; line-height: 28px; padding: 0 6px; }
+input[type="text"].calendar { padding: 0 0 0 34px !important; background: #fff url("../images/common/icon/date.png") 8px 6px no-repeat; }
+
+textarea { resize: none; font-family: 'yahei;'; padding: 5px; }
+textarea.text_round { border: 1px solid #d7d7d7; border-radius: 5px; }
+
+select { -webkit-appearance: none; border: none; line-height: 26px; padding: 0 25px 0 15px; border: 1px solid #e1e1e1; color: #fff; background: #fff url("../images/common/select_arrow.png") right 50% no-repeat; color: #000; }
+
+legend { display: none; }
+
+a { color: #000; text-decoration: none; }
+
+i, em { font-style: normal; }
+
+table { width: 100%; table-layout: fixed; }
+table th { text-align: center; }
+table td * { vertical-align: middle; }
+
+.aLeft { text-align: left; }
+
+.scr::-webkit-scrollbar { width: 8px; height: 5px; -webkit-appearance: none; }
+.scr::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.6); }
+
+/* 과목 머릿말 */
+mark[class^="mark_"] { display: inline-block; line-height: 22px; padding: 0 8px; }
+mark[class^="mark_"][class*="sci"] { background: #ddefe5; }
+mark[class^="mark_"].teacher { background-color: #dae2f3; }
+mark[class^="mark_"].student { background-color: #ddefe5; }
+
+/* 라운드 버튼: ex)목록으로(하늘색)*/
+.btn_round { display: inline-block; height: 24px; line-height: 24px; padding: 0 12px; border-radius: 5px; border: 1px solid #51b9f1; color: #51b9f1; }
+.btn_round * { vertical-align: middle; }
+.btn_round.default { color: #78828c; border-color: #ccc; }
+.btn_round.defaultF { background-color: #ebebeb; color: #525b6f; border-color: #ccc; }
+.btn_round.defaultF.reverse { background-color: #fff; }
+.btn_round.danger { color: #ec4a3f; border-color: #ec4a3f; background-color: #fff; }
+.btn_round i { display: inline-block; width: 14px; height: 14px; margin: -4px 4px 0 0; background: url() 50% 50% no-repeat; }
+.btn_round i.add { background-image: url("../images/common/icon/ico_cross.png"); }
+.btn_round i.x { background-image: url("../images/common/icon/ico_x.png"); }
+
+/* 3개 노출되는 셀렉트박스 */
+.select_row { position: relative; }
+.select_row p { border: 1px solid #e1e1e1; line-height: 28px; padding: 0 6px 0 30px; background: url("../images/common/icon/ico_arrow1.png") 8px 50% no-repeat; }
+.select_row .layer { position: absolute; overflow: hidden; overflow-y: auto; width: 100%; left: 0; top: -28px; border: 1px solid #e1e1e1; height: 84px; background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ECECEC), to(#ECECEC), color-stop(0.5, #FFFFFF)); }
+.select_row .layer ul li { padding: 0 0 0 30px; line-height: 28px; color: #525b6f; cursor: pointer; }
+.select_row .layer ul li.checked { background: url("../images/common/icon/ico_arrow1.png") 8px 50% no-repeat; }

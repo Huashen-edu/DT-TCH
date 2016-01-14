@@ -1,0 +1,84 @@
+
+// 提醒详细数据
+$(function() {
+	tchSubTempFrame.alarmView = {};
+	tchSubTempFrame.alarmView.wrapper = $('#wrapper');
+
+	// init
+	tchSubTempFrame.alarmView.init = function(){
+		tchSubTempFrame.alarmView.viewInit();
+		//tchSubTempFrame.alarmView.eventBind();
+
+		//momsSubTempFrame.alarmView.wrapper.attr('data-color' , localStorage.getObject('parentInfo').parent_type);
+	}
+
+
+	// event bind
+/*	tchSubTempFrame.alarmView.eventBind = function(){
+		$('.btn-prev').on(BIND_EVENT_TYPE, function(){
+			if(window.jline){
+				window.jline.closePopupWebView("");
+			}else{
+				window.close();
+			}
+		});
+	}*/
+
+
+	// view init
+	tchSubTempFrame.alarmView.viewInit = function(){
+		var params = {
+			aid : cts_getParameter("key")
+		}
+
+		// 获取提醒详细信息
+		getAjaxPostData("getAlarmInfo.do?", params, true, function(data){
+			if(data.resultcode == '0000'){
+				tchSubTempFrame.alarmView.wrapper.find('.view_title').text(data.result.title);										// 제목
+				tchSubTempFrame.alarmView.wrapper.find('.view_writer').text('['+ data.result.user_name +']');						// 작성자
+				tchSubTempFrame.alarmView.wrapper.find('.view_regDate').text((data.result.reg_date).toString().substring(0,16));	// 날짜
+				tchSubTempFrame.alarmView.wrapper.find('.cnt-contain .cnt').html(viewMemo(data.result.memo));						// 내용
+
+				//附件
+				if(data.result.fileList && data.result.fileList.length > 0){
+					var fileListDom = $('<div class="file-download"><div class="fileWrap"></div></div>');
+
+					data.result.fileList.forEach(function(file){
+						console.debug("file" , file);
+
+						var f_dom = $('	<div><a href="'+ (file.filepath + file.filename) +'" class="dataType">'+file.filename+'</a></div>');
+
+						f_dom.click(function(e){
+							debugger;
+							e.preventDefault();
+							var url = file.filepath;
+							if(file.filepath && !file.filepath.match("http://")){
+								url = lmsUrl+file.filepath;
+							}
+
+							if(!iosCheck()){
+								OpenDataUrl(file.filename , url);
+							}else{
+								self.location.href = "opendocument" + file.filepath + file.filename;
+							}
+						});
+
+						fileListDom.find(".fileWrap").append(f_dom);
+					});
+
+					tchSubTempFrame.alarmView.wrapper.find('.cnt-contain').append(fileListDom);
+				}else{
+					// 没有附件
+				}
+			}else{
+				//失败处理.
+				commonAlert('处理失败', false , null, null);
+				return;
+			}
+		});
+	}
+
+	tchSubTempFrame.alarmView.init();
+});
+
+

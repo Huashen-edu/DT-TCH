@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<title>家长问答</title>
+
+<meta name="viewport"
+	content="widstrong=device-widstrong,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+<link rel="stylesheet" href="/thirdparty/amazeui/css/amazeui.min.css" />
+<link type='text/css' rel="stylesheet" href="../css/reset.css" />
+<link type='text/css' rel="stylesheet" href="../css/module.css" />
+<link type='text/css' rel="stylesheet" href="../css/teacher.css" />
+<script type="text/javascript" src="../js/common/jquery-2.1.3.js"></script>
+<script type="text/javascript" src="../js/common/cts_common.js"></script>
+<script type="text/javascript" src="/thirdparty/amazeui/js/amazeui.js">
+	
+</script>
+<script type="text/javascript"
+	src="/thirdparty/amazeui/js/amazeui.widgets.helper.min.js">
+	
+</script>
+<script type="text/javascript" src="../js/common/_config.js">
+	
+</script>
+<script type="text/javascript" src="../js/common/xpull.js">
+	
+</script>
+
+<style type="text/css">
+	.myphoto{
+		max-width:110px;
+		max-height: 110px
+	}
+	
+	.edit_profile_img {
+	float: left;
+    overflow: hidden;
+    display: inline-block;
+    margin-right: 12px;
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.2);
+}
+</style>
+<body>
+	<div id="wrapper" data-color="M" class="m_qna page-center"
+		style="display: none;">
+		<div class="intro">
+			<img src="../images/load_015s.gif" alt="" />
+		</div>
+		<!-- contain -->
+		<div id="container" style="display: none;" style="padding: 0 0 0 0">
+
+			<section class="qna m_qna m_alarm" data-natype="qna">
+
+				<header data-am-widget="header" class="am-header am-header-default">
+					<h1 class="am-header-left am-header-nav">
+						<label id="txtTeacherStatus"> </label>
+					</h1>
+
+					<div class="am-header-right am-header-nav">
+						<a href="#doc-oc-demo2" href="#doc-oc-demo1" data-am-offcanvas>
+							 切换 
+						</a>
+					</div>
+				</header>
+
+				<!-- 侧边栏内容 -->
+				<div id="doc-oc-demo2" class="am-offcanvas">
+					<div class="am-offcanvas-bar">
+						<section
+							class="amz-sidebar am-offcanvas-bar am-offcanvas-bar-overlay am-offcanvas-bar-active">
+
+
+
+							<ul id="selTeacherStatus" class="am-nav">
+
+							</ul>
+						</section>
+					</div>
+				</div>
+
+				<!-- 按钮 -->
+				<!-- <a href="" class="btn-request" id="btnQaRegist"> <span>问答</span>
+				</a> -->
+
+				<ol class="list qna_list">
+					<!-- 表单 -->
+				</ol>
+
+			</section>
+			<!-- //코딩 영역 -->
+
+			<!-- alert -->
+			<div class="alert" style="display: none;">
+				<p class="desc">应用程序退出</p>
+
+				<div class="group-btn">
+					<a href="" class="btn-round danger">确认</a> <a href=""
+						class="btn-round">取消</a>
+				</div>
+			</div>
+			<!-- //alert -->
+		</div>
+		<!-- //contain -->
+	</div>
+
+	<!-- alert: 모바일 데이터 요금 부과 -->
+	<div class="alert-alpha" style="display: none;">
+		4G/3G 에서는 데이터 사용으로 인한<br> 과도한 요금이 부과될 수 있습니다
+	</div>
+	<!--  <section class="t-notice m_alarm" style="display: none;" id="container" data-natype="qna" ></section> -->
+	<a href="javascript:void(0)" class="top"></a>
+
+	<script src="../js/weixin/qna.js">
+		
+	</script>
+</body>
+</html>

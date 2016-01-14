@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+  <!-- The definition of the Root Spring Container shared by all Servlets and Filters -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/spring/root-context.xml</param-value>
+	</context-param>
+	
+	<!-- Creates the Spring Container shared by all Servlets and Filters -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	<!-- Processes application requests -->
+	<servlet>
+		<servlet-name>appServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/spring/servlet-context.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+		
+	<servlet-mapping>
+		<servlet-name>appServlet</servlet-name>
+		<url-pattern>*.do</url-pattern>
+		<!-- url-pattern>/rest/*</url-pattern --><!-- Restful 형식을 사용하고 Controller에서 @PathVariable을 사용할 경우 -->
+	</servlet-mapping>
+	
+	<servlet>
+        <servlet-name>coreServlet</servlet-name>
+        <servlet-class>
+           com.digital.tch.china.servlet.CoreServlet
+        </servlet-class>
+    </servlet>
+	
+	 <!-- url-pattern中配置的/coreServlet用于指定该Servlet的访问路径 -->
+    <servlet-mapping>
+        <servlet-name>coreServlet</servlet-name>
+        <url-pattern>/coreServlet</url-pattern>
+    </servlet-mapping>
+
+	<!-- Spring에서 처리하지 말아야 할 확장자는 default 서블릿에서 처리하게끔 사용하는 확장자를 주도록 한다 -->
+	<!-- 
+	<servlet-mapping>
+    	<servlet-name>default</servlet-name>
+    	<url-pattern>*.css</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+    	<servlet-name>default</servlet-name>
+    	<url-pattern>*.js</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+    	<servlet-name>default</servlet-name>
+    	<url-pattern>*.png</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+    	<servlet-name>default</servlet-name>
+    	<url-pattern>*.jpg</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+    	<servlet-name>default</servlet-name>
+    	<url-pattern>*.gif</url-pattern>
+	</servlet-mapping>
+	-->
+	 
+	<filter>
+    	<filter-name>encodingFilter</filter-name>
+    	<filter-class>
+        	org.springframework.web.filter.CharacterEncodingFilter
+    	</filter-class>
+    	<init-param>
+        	<param-name>encoding</param-name>
+        	<param-value>utf-8</param-value>
+    	</init-param>
+  	</filter>
+
+  	<filter-mapping>
+    	<filter-name>encodingFilter</filter-name>
+    	<url-pattern>/</url-pattern>
+    	<url-pattern>*.do</url-pattern>
+  	</filter-mapping>
+  	
+  	<!-- jsp include 파일 정의 -->
+  	<jsp-config>
+    	<jsp-property-group>
+        	<url-pattern>*.jsp</url-pattern>
+          	<page-encoding>utf-8</page-encoding>
+          	<include-prelude>/WEB-INF/views/include/include.jsp</include-prelude>
+      	</jsp-property-group>
+  	</jsp-config>
+  	
+  	
+  	<filter>
+    <filter-name>imagesCache</filter-name>
+    <filter-class>com.samaxes.filter.CacheFilter</filter-class>
+    <init-param>
+        <param-name>static</param-name>
+        <param-value>true</param-value>
+    </init-param>
+    <init-param>
+        <param-name>expirationTime</param-name>
+        <param-value>0</param-value>
+    </init-param>
+</filter>
+<filter>
+    <filter-name>cssCache</filter-name>
+    <filter-class>com.samaxes.filter.CacheFilter</filter-class>
+    <init-param>
+        <param-name>expirationTime</param-name>
+        <param-value>0</param-value>
+    </init-param>
+</filter>
+<filter>
+    <filter-name>jsCache</filter-name>
+    <filter-class>com.samaxes.filter.CacheFilter</filter-class>
+    <init-param>
+        <param-name>private</param-name>
+        <param-value>true</param-value>
+    </init-param>
+    <init-param>
+        <param-name>expirationTime</param-name>
+        <param-value>0</param-value>
+    </init-param>
+</filter>
+<filter>
+    <filter-name>htmlCache</filter-name>
+    <filter-class>com.samaxes.filter.CacheFilter</filter-class>
+    <init-param>
+        <param-name>private</param-name>
+        <param-value>true</param-value>
+    </init-param>
+    <init-param>
+        <param-name>expirationTime</param-name>
+        <param-value>0</param-value>
+    </init-param>
+</filter>
+
+
+<filter-mapping>
+    <filter-name>cssCache</filter-name>
+    <url-pattern>*.css</url-pattern>
+</filter-mapping>
+ 
+<filter-mapping>
+    <filter-name>jsCache</filter-name>
+    <url-pattern>*.js</url-pattern>
+</filter-mapping>
+ 
+<filter-mapping>
+    <filter-name>imagesCache</filter-name>
+    <url-pattern>*.png</url-pattern>
+    <url-pattern>*.gif</url-pattern>
+    <url-pattern>*.jpg</url-pattern>
+</filter-mapping>
+
+<filter-mapping>
+    <filter-name>htmlCache</filter-name>
+    <url-pattern>*.html</url-pattern>
+</filter-mapping>
+
+</web-app>

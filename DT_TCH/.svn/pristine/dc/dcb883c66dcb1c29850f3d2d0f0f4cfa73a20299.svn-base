@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+<meta charset="UTF-8">
+<title>教师提醒</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no">
+<meta name="renderer" content="webkit">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="cache-control" content="no-cache">
+<meta http-equiv="expires" content="0">
+<!-- <link rel="alternate icon" type="image/png" href="/thirdparty/amazeui/i/favicon.png"> -->
+<link rel="shortcut icon" href="../images/favicon.ico" />
+<link rel="stylesheet" href="/thirdparty/amazeui/css/amazeui.css" />
+<link type='text/css' rel="stylesheet" href="../css/reset.css" />
+<link type='text/css' rel="stylesheet" href="../css/module.css" />
+<script type="text/javascript" src="../js/common/jquery-2.1.3.js"></script>
+<!-- <script type="text/javascript" src="/thirdparty/amazeui/js/jquery.sumoselect.min.js"></script> -->
+
+<style>
+.header {
+	text-align: center;
+}
+
+.header h1 {
+	font-size: 200%;
+	color: #333;
+	margin-top: 30px;
+}
+
+.header p {
+	font-size: 14px;
+}
+
+#wrapper {
+	position: absolute;
+	top: 52px;
+	bottom: 0;
+	overflow: hidden;
+	margin: 0;
+	width: 100%;
+	padding: 0 8px;
+	background-color: #f8f8f8;
+}
+
+
+
+
+
+.amz-sidebar .am-nav>li.am-nav-header, .amz-sidebar .am-nav>li>a {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    border-top: 1px solid rgba(0,0,0,.3);
+}
+.amz-sidebar .am-nav>li>a {
+    -webkit-transition: .15s;
+    transition: .15s;
+     color: #ccc;
+    border-radius: 0;
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+.amz-sidebar .am-nav>li>a:hover {
+background-color:#404040;
+color:#FFFFFF;
+}
+
+.amz-sidebar .am-nav>li.am-active>a {
+    background: #1a1a1a;
+    color: #fff;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.3);
+}
+
+
+.am-nav>li.am-active>a, .am-nav>li.am-active>a:focus, .am-nav>li.am-active>a:hover {
+    color: #fff;
+    background-color: #0e90d2;
+    cursor: default;
+}
+
+</style>
+</head>
+<body>
+<!-- 	<header data-am-widget="header" class="am-header am-header-default">
+		<h1 class="am-header-title">教师提醒</h1>
+	</header>
+	 -->
+	  <header data-am-widget="header" class="am-header am-header-default">
+          <h1 class="am-header-left am-header-nav">
+            <label id ="txtTeacherStatus">
+            </label>
+          </h1>
+
+          <div class="am-header-right am-header-nav">
+            <a href="#doc-oc-demo2" href="#doc-oc-demo1" data-am-offcanvas>
+              切换
+            </a>
+          </div>
+        </header>
+
+        <!-- 侧边栏内容 -->
+        <div id="doc-oc-demo2" class="am-offcanvas">
+          <div class="am-offcanvas-bar">
+            <section 
+                class="amz-sidebar am-offcanvas-bar am-offcanvas-bar-overlay am-offcanvas-bar-active"
+                style="max-height: 443px;">
+
+
+
+              <ul id="selTeacherStatus" class="am-nav">
+
+              </ul>
+            </section>
+          </div>
+        </div>
+	<div class="am-g">
+		<div class="am-u-lg-6 am-u-md-8 am-u-sm-centered am-margin-top">
+
+			<form id="mainform" class="am-form" style="margin-top:10%;">
+
+
+				<div class="am-g am-margin-bottom">
+					<label for="title" class="am-u-sm-3">标题</label>
+					<div class="am-u-sm-9">
+						<input type="text" class="" id="title" minlength="3" maxlength="60"
+							placeholder="输入标题（至少 3 个字符）" required>
+					</div>
+				</div>
+
+				<div class="am-g am-margin-bottom T-T am-hide">
+					<label for="studentlisttxt" class="am-u-sm-3">被提醒人</label>
+					<div class="am-u-sm-9">
+						<input type="text" class="" id="studentlisttxt"
+							placeholder="请选择学生" readonly style="background-color: #FFFFFF">
+					</div>
+				</div>
+				
+				<div class="am-g am-margin-bottom T-L am-hide">
+					<label for="subjectlist" class="am-u-sm-3">科目</label>
+					<div class="am-u-sm-9">
+					<select id="subjectlist" required>
+				      </select>
+				     </div>
+				</div>
+				
+				<div class="am-g am-margin-bottom T-L am-hide">
+					<label for="classlist" class="am-u-sm-3">班级</label>
+					<div class="am-u-sm-9" id="classlist">
+					</div>
+				</div>
+				
+				<div class="am-g am-margin-bottom">
+					<label for="doc-ta-1" class="am-u-sm-3">内容</label>
+					<div class="am-u-sm-9">
+						<textarea class="" rows="5" id="memo"
+							placeholder="请输入提醒内容（至少 5个字符）" minlength="5" maxlength="500"></textarea>
+					</div>
+				</div>
+
+				<div class="am-g am-margin-bottom ">
+					<label class="am-u-sm-3">添加附件</label>
+					<div class="am-u-sm-9" id="uploadwapper">
+						<div class="am-margin-bottom-sm am-form-file">
+							<button type="button" class="am-btn am-btn-default am-btn-sm">
+								<i class="am-icon-cloud-upload"></i> 请选择文件
+							</button>
+							<input id="doc-form-file" type="file">
+						</div>
+					</div>
+				</div>
+				<div id="file-list"></div>
+				<div class="am-g">
+					<label for="doc-ta-1" class="am-u-sm-3"></label>
+					<div class="am-u-sm-9">
+						<button type="button" onclick="ajaxsubmit();"
+							class="am-btn am-btn-success">提交</button>
+					</div>
+				</div>
+
+			</form>
+
+		</div>
+	</div>
+	
+	<!-- alert -->
+    <div class="alert" id="main_common_alert" style="display: none;">
+
+    </div>
+    <!-- //alert -->
+    
+    <!-- 错误信息 alert -->
+    <div class="alert" id="tch_alarmadd_alert" style="display: none;">
+      <p class="desc"></p>
+
+      <div class="group-btn">
+        <a href="#" class="btn-round danger full" id="tch_alarmadd_alert_ok_btn" data-kor="确认">
+         	 确认
+        </a>
+      </div>
+    </div>
+
+	<div class="am-modal am-modal-confirm" tabindex="-1" id="my-confirm">
+		<div class="am-modal-dialog">
+			<div class="am-modal-hd">确认框</div>
+			<div class="am-modal-bd">确定提交吗？</div>
+			<div class="am-modal-footer">
+				<span class="am-modal-btn" data-am-modal-cancel>取消</span> <span
+					class="am-modal-btn" data-am-modal-confirm>确定</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="am-modal am-modal-alert" tabindex="-1" id="my-alert">
+		<div class="am-modal-dialog">
+			<div class="am-modal-hd">提示框</div>
+			<div class="am-modal-bd"></div>
+			<div class="am-modal-footer">
+				<span class="am-modal-btn">确定</span>
+			</div>
+		</div>
+	</div>
+	<div class="am-modal am-modal-alert" tabindex="-1" id="common-alert">
+		<div class="am-modal-dialog">
+			<div class="am-modal-hd">提示框</div>
+			<div class="am-modal-bd"></div>
+			<div class="am-modal-footer">
+				<span class="am-modal-btn">确定</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="am-popup" id="my-popup">
+		<header id="popupheader" data-am-widget="header"
+			class="am-header am-header-default "
+			style="position: absolute; top: 0px; background-color: #fff; border-bottom: 2px solid #0e90d2; padding-top: 6px">
+			<label class="am-checkbox am-fl"><input id="chk_selectAll"
+				type="checkbox" value="0" data-am-ucheck>全选 </label>
+			<!-- <button id="btn_cancel_alarm" type="button" class="am-btn am-btn-sm am-btn-danger am-radius am-fr am-margin-horizontal-xs">取消</button> -->
+			<button id="btn_close_alarm"
+				class="am-btn am-btn-sm am-btn-primary am-radius am-fr am-margin-horizontal-xs">关闭</button>
+			<span class="am-margin-top-xs am-margin-horizontal-xs am-fr"
+				style="line-height: 26px">已选中<span id="spn_selectednum_alarm"
+				class="am-badge am-badge-success">0</span>人
+			</span>
+		</header>
+		<div id="wrapper" data-am-widget="list_news"
+			class="am-list-news am-list-news-default">
+			<ul class="am-list am-list-static am-list-border">
+			</ul>
+		</div>
+	</div>
+</body>
+	<script type="text/javascript" src="/thirdparty/amazeui/js/amazeui.js"></script>
+	<script type="text/javascript" src="/thirdparty/amazeui/js/amazeui.widgets.helper.min.js"></script>
+	<script type="text/javascript" src="../js/common/_config.js"></script>
+	<script type="text/javascript" src="../js/common/cts_common.js"></script>
+	<script type="text/javascript" src="../js/weixin/alarm_add.js"></script>
+</html>

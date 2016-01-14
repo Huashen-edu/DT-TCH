@@ -1,0 +1,655 @@
+
+$(function() {
+    momsSubTempFrame.qna.listWrapper = $('.qna');					// 리스트 폼
+    momsSubTempFrame.qna.writeWrapper = $('.qna_write');			// 등록폼
+	momsSubTempFrame.qna.chatWrapper = $('.qna_chat');				// 문의, comment 폼
+	momsSubTempFrame.qna.sFlag = false;
+	momsSubTempFrame.qna.replyType = '';							// 다시문의하기 ,수정 구분값
+	momsSubTempFrame.qna.backHistory = '';			
+
+    // init
+    momsSubTempFrame.qna.init = function(){
+        currentPage = 1;
+        momsSubTempFrame.qna.subjectInit(); // subject init
+        momsSubTempFrame.qna.eventBind();
+
+		$('#container').xpull({
+			'callback':function(){
+				momsSubTempFrame.qna.sFlag = false;
+				momsSubTempFrame.qna.listInit("refresh");
+			}
+		});
+    }
+
+
+    // event bind
+    momsSubTempFrame.qna.eventBind = function(){
+        // 질문등록 버튼
+        momsSubTempFrame.wrapper.find('.btn-faq').on(BIND_EVENT_TYPE,function(){
+			if(momsSubTempFrame.qna.listWrapper.is(":visible")){
+				momsSubTempFrame.qna.backHistory = 'list';
+			}else if(momsSubTempFrame.qna.chatWrapper.is(":visible")){
+				momsSubTempFrame.qna.backHistory = 'chat';
+			}
+			
+            momsSubTempFrame.qna.listWrapper.fadeOut(300,function(){
+				momsSubTempFrame.qna.chatWrapper.fadeOut(300,function(){
+					momsSubTempFrame.qna.writeWrapper.fadeIn(300);
+				});
+            });
+
+			momsSubTempFrame.wrapper.find('.top').hide();
+            $(this).hide();
+        });
+
+        // 등록시 과목 버튼
+        momsSubTempFrame.qna.writeWrapper.on(BIND_EVENT_TYPE, '.btn_select_subject', function(){
+            var $this = $(this);
+            momsSubTempFrame.qna.writeWrapper.find('.btn_select_subject.danger').removeClass('danger');
+            $this.addClass('danger');
+        });
+
+
+		// 이모티콘 입력순간 캐치
+		momsSubTempFrame.qna.writeWrapper.find('#write_contents').on('keyup',function(){
+			momsSubTempFrame.qna.emojiCheck(textAreaInputChk(momsSubTempFrame.qna.writeWrapper.find('#write_contents').val()) , function(){
+				
+			});
+		});
+
+
+
+        // qna 등록버튼
+        momsSubTempFrame.qna.writeWrapper.on(BIND_EVENT_TYPE, '.btn_qna_register', function(){
+
+			momsSubTempFrame.qna.emojiCheck(textAreaInputChk(momsSubTempFrame.qna.writeWrapper.find('#write_contents').val()) , function(){
+				//이모티콘 없으면 정상 저장 로직 수행
+				var params = {
+					parent_id : localStorage.getItem('MOMS_id'),
+					contents : textAreaInputChk(momsSubTempFrame.qna.writeWrapper.find('#write_contents').val()),
+					subject : momsSubTempFrame.qna.writeWrapper.find('.btn_select_subject.danger').attr('data-subject'),
+					class_no : momsSubTempFrame.qna.writeWrapper.find('.btn_select_subject.danger').attr('data-class'),
+					teacher_id : momsSubTempFrame.qna.writeWrapper.find('.btn_select_subject.danger').attr('data-tid')
+				}
+
+				if(momsSubTempFrame.qna.writeWrapper.find('#write_contents').val() == ''){
+					momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('请输入<strong>提问</strong>。'); //<strong>질문</strong>을 입력하세요.
+					momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+					return;
+				}
+
+				getAjaxPostData("insertParentQa.do?", params, false, function(data){
+					if(data.resultcode == '0000'){
+						console.log('등록성공');
+						momsSubTempFrame.qna.sFlag = false;
+						momsSubTempFrame.qna.subjectInit();
+						momsSubTempFrame.qna.writeWrapper.fadeOut(100,function(){
+							momsSubTempFrame.qna.listWrapper.fadeIn(100);
+						});
+						momsSubTempFrame.wrapper.find('.top').show();
+						momsSubTempFrame.wrapper.find('.btn-faq').show();
+					}else{
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。'); //처리에 실패했습니다.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+						return;
+					}
+				});
+			});
+        });
+
+		// qna 취소버튼
+        momsSubTempFrame.qna.writeWrapper.on(BIND_EVENT_TYPE, '.btn_qna_cancel', function(){
+			momsSubTempFrame.qna.writeWrapper.fadeOut(100,function(){
+				switch(momsSubTempFrame.qna.backHistory){
+					case 'list' :
+						momsSubTempFrame.qna.listWrapper.fadeIn(100);	
+						break;
+					case 'chat' :
+						momsSubTempFrame.qna.chatWrapper.fadeIn(100);
+						break;
+				}
+			});
+			momsSubTempFrame.wrapper.find('.top').show();
+			momsSubTempFrame.wrapper.find('.btn-faq').show();
+		});
+
+
+
+		// emoji 체크 로직
+		momsSubTempFrame.qna.emojiCheck = function(textInput , callback){
+			// textarea 입력 변환
+			//var transTxt = minEmoji(textInput);
+
+			// 이모티콘 체크
+			if(checkEmoji(textInput)){
+				momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('此环境不支持表情，<br/>请删除表情。');  //이모티콘을 삭제하고 다시 입력하세요.
+				momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				return;
+			}else{
+				callback();
+			}
+		}
+
+
+		// 리스트 새로고침
+		/*
+		momsSubTempFrame.qna.listWrapper.on(BIND_EVENT_TYPE, '.btn_list_refresh', function(){
+			momsSubTempFrame.qna.sFlag = false;
+			momsSubTempFrame.qna.listInit();
+		});
+		*/
+
+
+        // QNA 리스트 항목 하나를 클릭시 상세로 이동
+        momsSubTempFrame.qna.listWrapper.on(BIND_EVENT_TYPE, '.originalWrap .qna_box', function(){
+			var $this = $(this);
+
+			if($this.hasClass('new')){
+				// 읽음 api로 전송 (New 사라짐)
+				var params = {
+					type : "Q",
+					key : $this.attr('data-pqaid'),
+					user_id : localStorage.getItem('MOMS_id')
+				}
+
+				getAjaxPostData("insertRead.do?", params, false, function(data){
+					if(data.resultcode == '0000'){
+						$this.removeClass('new');
+					}else{
+						console.log('insertRead 오류');
+						return;
+					}
+				});
+			}else{
+				console.log('이미 읽은 게시글');
+			}
+
+			// 채팅화면 요청 data setting
+			momsSubTempFrame.qna.chatWrapper.firstComment = {};
+			momsSubTempFrame.qna.chatWrapper.firstComment = {
+				subject : $this.find('li.subject').text(),
+				date : $this.find('li.date').text(),
+				comment : $this.find('dd').text(),
+				pqaid : $this.attr('data-pqaid')
+			};
+
+			momsSubTempFrame.qna.chatInit.pqaid = $this.attr('data-pqaid');		// 해당질문글의 고유번호 set
+			momsSubTempFrame.qna.chatInit();
+
+            momsSubTempFrame.qna.listWrapper.fadeOut(300,function(){
+				scrollTopBottom('top');		// 스크롤 최상단
+				momsSubTempFrame.qna.chatWrapper.find('.btn_bottom_wrapper').show().andSelf().find('.inquiry').hide();
+				momsSubTempFrame.qna.chatWrapper.fadeIn(300);
+			});
+        });
+
+		// 답변 페이지 - 목록으로 btn
+        momsSubTempFrame.qna.chatWrapper.on(BIND_EVENT_TYPE, '.board-header .btn_goback_list', function(){
+			momsSubTempFrame.qna.sFlag = false;
+			momsSubTempFrame.qna.listInit("init");
+            momsSubTempFrame.qna.chatWrapper.fadeOut(300,function(){
+				momsSubTempFrame.qna.listWrapper.fadeIn(300);
+			});
+        });
+
+
+		// 다시문의하기 버튼
+		momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_write').on(BIND_EVENT_TYPE,function(){
+			momsSubTempFrame.qna.replyType = 'reQna';
+			momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_regist').text('注册'); //등록
+			momsSubTempFrame.qna.chatWrapper.find('.btn_bottom_wrapper').hide();
+			momsSubTempFrame.qna.chatWrapper.find('.inquiry').fadeIn(200,function(){
+				scrollTopBottom('bottom');
+			});
+		});
+
+		// 수정 버튼
+		momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_edit').on(BIND_EVENT_TYPE,function(){
+			momsSubTempFrame.qna.replyType = 'update';
+			momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_regist').text('修改'); //수정
+			momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val(momsSubTempFrame.qna.chatWrapper.find('.re_contents:last').text());
+
+			momsSubTempFrame.qna.chatWrapper.find('.btn_bottom_wrapper').hide();
+			momsSubTempFrame.qna.chatWrapper.find('.inquiry').fadeIn(200,function(){
+				scrollTopBottom('bottom');
+			});
+		});
+
+		// 삭제 버튼
+		momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_delete').on(BIND_EVENT_TYPE,function(){
+
+			// 질문 삭제
+			
+			momsSubTempFrame.wrapper.find('#main_default_alert .desc').html('确定要删除选择项吗？'); //해당 리스트를 삭제하시겠습니까?
+			momsSubTempFrame.wrapper.find('#main_default_alert').attr('data-type','deleteQnA');
+			momsSubTempFrame.wrapper.find('#main_default_alert').fadeIn(250);
+
+			/*
+			if(momsSubTempFrame.qna.chatWrapper.find('.questionItem').length == 1){
+				var params = {
+					pqaid : momsSubTempFrame.qna.chatWrapper.find('.questionItem:last').attr('data-pqaid')
+				}
+
+				getAjaxPostData("deleteParentQa.do?", params, true, function(data){
+					console.log(data)
+					if(data.resultcode == '0000'){
+						console.log('질문삭제성공');
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('提问已被删除。'); //질문이 삭제되었습니다.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+
+						momsSubTempFrame.qna.sFlag = false;
+						momsSubTempFrame.qna.listInit("init");
+						momsSubTempFrame.qna.chatWrapper.fadeOut(300,function(){
+							momsSubTempFrame.qna.listWrapper.fadeIn(300);
+						});
+					}else{
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。');  //처리에 실패했습니다.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+						return;
+					}
+				});
+			}else{		 // 댓글 삭제
+				var params = {
+					comment_id : momsSubTempFrame.qna.chatWrapper.find('.questionItem:last').attr('data-commentid')
+				}
+
+				getAjaxPostData("deleteParentQaComment.do?", params, true, function(data){
+					if(data.resultcode == '0000'){
+						console.log('댓글삭제성공');
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('提问已被删除。'); //문의가 삭제되었습니다.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+						momsSubTempFrame.qna.chatInit();
+					}else{
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。');  //처리에 실패했습니다.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+						return;
+					}
+				});
+			}
+			*/
+		});
+
+
+		// 이모티콘 입력순간 캐치
+		momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').on('keyup',function(){
+			momsSubTempFrame.qna.emojiCheck(textAreaInputChk(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val()) , function(){
+				
+			});
+		});
+
+
+		// qna 댓글 등록 버튼
+        momsSubTempFrame.qna.chatWrapper.on(BIND_EVENT_TYPE, '.btn_re_qna_regist', function(){
+			// 질문 수정 일때
+			if(momsSubTempFrame.qna.chatWrapper.find('.reply_qnaWrap').length == 0){
+				
+				momsSubTempFrame.qna.emojiCheck(textAreaInputChk(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val()) , function(){
+					//이모티콘 없으면 정상 저장 로직 수행
+					var params = {
+						pqaid : momsSubTempFrame.qna.chatWrapper.find('.questionItem:last').attr('data-pqaid'),
+						contents : textAreaInputChk(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val())
+					}
+
+					if(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val() == ''){
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('请输入<strong>提问内容</strong>。'); //<strong>문의할 내용</strong>을 입력하세요.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+						return;
+					}
+
+					getAjaxPostData("updateParentQa.do?", params, true, function(data){
+						if(data.resultcode == '0000'){
+							console.log('질문수정성공');
+							momsSubTempFrame.qna.chatWrapper.firstComment['comment'] = momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val();
+							momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('提问已被修改。'); //질문이 수정되었습니다.
+							momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+							momsSubTempFrame.qna.chatInit();
+						}else{
+							momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。');  //처리에 실패했습니다.
+							momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+							return;
+						}
+					});
+				});
+			}else{	// 댓글 수정 일때
+				if(momsSubTempFrame.qna.replyType == 'reQna'){
+					
+					momsSubTempFrame.qna.emojiCheck(textAreaInputChk(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val()) , function(){
+						//이모티콘 없으면 정상 저장 로직 수행
+						var params = {
+							user_id : localStorage.getItem('MOMS_id'),
+							comment : textAreaInputChk(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val()),
+							pqaid : momsSubTempFrame.qna.chatInit.pqaid		// 해당 질문의 고유 id
+						}
+
+						if(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val() == ''){
+							momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('请输入<strong>提问内容</strong>。'); //<strong>문의할 내용</strong>을 입력하세요.
+							momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+							return;
+						}
+
+						getAjaxPostData("insertParentQaComment.do?", params, true, function(data){
+							if(data.resultcode == '0000'){
+								console.log('문의등록성공');
+								momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('提问已发布。'); //문의가 등록되었습니다.
+								momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+								momsSubTempFrame.qna.chatInit();
+							}else{
+								momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。');  //처리에 실패했습니다.
+								momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+								return;
+							}
+						});
+					});
+				}else{
+
+					momsSubTempFrame.qna.emojiCheck(textAreaInputChk(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val()) , function(){
+						//이모티콘 없으면 정상 저장 로직 수행
+						var params = {
+							comment_id : momsSubTempFrame.qna.chatWrapper.find('.questionItem:last').attr('data-commentid'),
+							comment : textAreaInputChk(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val())
+						}
+
+						if(momsSubTempFrame.qna.chatWrapper.find('#re_qna_contents').val() == ''){
+							momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('请输入<strong>提问内容</strong>。'); //<strong>문의할 내용</strong>을 입력하세요.
+							momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+							return;
+						}
+
+						getAjaxPostData("updateParentQaComment.do?", params, true, function(data){
+							if(data.resultcode == '0000'){
+								console.log('문의수정성공');
+								momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('提问已被修改。'); //문의가 수정되었습니다.
+								momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+								momsSubTempFrame.qna.chatInit();
+							}else{
+								momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('处理失败。');  //처리에 실패했습니다.
+								momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+								return;
+							}
+						});
+					});
+				}
+			}
+		});
+
+		// chat 안에 취소버튼
+		momsSubTempFrame.qna.chatWrapper.on(BIND_EVENT_TYPE, '.btn_re_qna_cancel', function(){
+			momsSubTempFrame.qna.chatWrapper.find('.inquiry').fadeOut(200,function(){
+				momsSubTempFrame.qna.chatWrapper.find('.btn_bottom_wrapper').show();
+			});
+		});
+    }
+
+    // subject init
+    momsSubTempFrame.qna.subjectInit = function(){
+        momsSubTempFrame.qna.subjectObj = {};
+        momsSubTempFrame.qna.writeWrapper.find('#write_contents').val('');
+
+        var params = {
+			user_id : localStorage.getItem('MOMS_id')
+        }
+
+		getAjaxPostData("getQaSubjectList.do?", params, true, function(data){
+            console.log(data);
+			var listDom = '';
+            momsSubTempFrame.qna.writeWrapper.find('.select-area .tch-list ul').empty();
+
+            for(var i=0; i<data.result.length; i++){
+                momsSubTempFrame.qna.subjectObj[data.result[i].subject] = data.result[i].subject_name;
+                listDom += '<li><a href="#" class="btn_select_subject" data-class="'+data.result[i].class_no+'" data-subject="'+data.result[i].subject+'" data-tid="'+data.result[i].teacher_id+'">'+data.result[i].subject_name+'</a></li>';
+            }
+            momsSubTempFrame.qna.writeWrapper.find('.select-area .tch-list ul').html(listDom);		// 등록폼에 set
+            momsSubTempFrame.qna.writeWrapper.find('.select-area .tch-list .btn_select_subject:first').addClass('danger');
+
+			momsSubTempFrame.qna.listInit("init");	// 리스트 init
+        });
+    }
+
+
+    // qna list init
+    momsSubTempFrame.qna.listInit = function(type){
+		currentPage = 1;
+
+		var progress = false;
+
+		if(type == "init"){
+			momsSubTempFrame.qna.listWrapper.find('.originalWrap').empty();
+			progress = true;
+		}
+
+        var params = {
+			parent_id : localStorage.getItem('MOMS_id'),
+			currentPage : currentPage
+		}
+
+
+		//리스트 생성
+		getAjaxPostData("getParentQaList.do?", params, progress, function(data){
+			console.log(data);
+			if(data.resultcode == '0000'){
+				if(data.result.length == 0){
+					momsSubTempFrame.qna.listWrapper.find('.emptyMsg').show();		// 리스트 하나도 없을때
+					momsSubTempFrame.qna.listWrapper.find('.btn_list_refresh').hide();
+				}else{
+					momsSubTempFrame.qna.listWrapper.find('.emptyMsg').hide();		// empty message hide
+					momsSubTempFrame.qna.listWrapper.find('.btn_list_refresh').show();
+
+					var listDom = '';
+					momsSubTempFrame.qna.listWrapper.find('.originalWrap').empty();
+
+					for(var i=0; i<data.result.length; i++){
+						var reg_date = cts_split((data.result[i].reg_date), ' ');
+						
+						// 선생님이 답변을 달았을때 NEW 아이콘 setting
+						if((data.result[i].new_cnt == 0)&&((data.result[i].comment_cnt)%2 != 0)){
+							listDom += '<dl class="qna_box new" style="cursor:pointer" data-pqaid="'+data.result[i].pqaid+'" data-ccnt="'+data.result[i].comment_cnt+'">';
+						}else{
+							listDom += '<dl class="qna_box" style="cursor:pointer" data-pqaid="'+data.result[i].pqaid+'" data-ccnt="'+data.result[i].comment_cnt+'">';
+						}
+
+						listDom += '<dt>';
+						listDom += '<ul>';
+						listDom += '<li class="subject">'+momsSubTempFrame.qna.subjectObj[data.result[i].subject]+'</li>';
+						listDom += '<li class="progress">';
+
+						// 상태 (짝수일때는 답변 대기중 (0포함), 홀수일때는 답변완료)
+						if((data.result[i].comment_cnt)%2 == 0){
+							listDom += '<mark class="marking waiting" data-kor="답변대기중">等待回答中</mark>';
+						}else{
+							listDom += '<mark class="marking complete" data-kor="답변완료">回答完成</mark>';
+						}
+
+						listDom += '</li>';
+						listDom += '<li class="date">'+reg_date[0]+'</li>';
+						listDom += '</ul>';
+						listDom += '</dt>';
+						listDom += '<dd>'+data.result[i].contents+'</dd>';
+						listDom += '</dl>';
+					}
+					momsSubTempFrame.qna.listWrapper.find('.originalWrap').html(listDom);
+				}
+			}else{
+				momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('<strong>目录信息</strong><br />连接失败。'); //<strong>리스트정보</strong>를<br /> 불러오지못했습니다.
+				momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+				return;
+			}
+		});
+    }
+
+
+	// qna list append
+    momsSubTempFrame.qna.listAppend = function(){
+		if(momsSubTempFrame.qna.listWrapper.is(':visible')){
+			if(!momsSubTempFrame.qna.sFlag){
+				console.log('리스트 append');
+				currentPage++;
+
+				var params = {
+					parent_id : localStorage.getItem('MOMS_id'),
+					currentPage : currentPage
+				}
+
+				getAjaxPostData("getParentQaList.do?", params, true, function(data){
+					console.log(data);
+					if(data.resultcode == '0000'){
+						if(data.result.length != 0){
+							var listDom = '';
+
+							for(var i=0; i<data.result.length; i++){
+								var reg_date = cts_split((data.result[i].reg_date), ' ');
+								
+								// 선생님이 답변을 달았을때 new 아이콘 setting
+								if((data.result[i].new_cnt == 0)&&((data.result[i].comment_cnt)%2 != 0)){
+									listDom += '<dl class="qna_box new" style="cursor:pointer" data-pqaid="'+data.result[i].pqaid+'" data-ccnt="'+data.result[i].comment_cnt+'">';
+								}else{
+									listDom += '<dl class="qna_box" style="cursor:pointer" data-pqaid="'+data.result[i].pqaid+'" data-ccnt="'+data.result[i].comment_cnt+'">';
+								}
+
+								listDom += '<dt>';
+								listDom += '<ul>';
+								listDom += '<li class="subject">'+momsSubTempFrame.qna.subjectObj[data.result[i].subject]+'</li>';
+								listDom += '<li class="progress">';
+
+								// 상태 (짝수일때는 답변 대기중 (0포함), 홀수일때는 답변완료)
+								if((data.result[i].comment_cnt)%2 == 0){
+									listDom += '<mark class="marking waiting" data-kor="답변대기중">等待回答中</mark>';
+								}else{
+									listDom += '<mark class="marking complete" data-kor="답변완료">回答完成</mark>';
+								}
+
+								listDom += '</li>';
+								listDom += '<li class="date">'+reg_date[0]+'</li>';
+								listDom += '</ul>';
+								listDom += '</dt>';
+								listDom += '<dd>'+data.result[i].contents+'</dd>';
+								listDom += '</dl>';
+							}
+							momsSubTempFrame.qna.listWrapper.find('.originalWrap').append(listDom);
+						}else{
+							momsSubTempFrame.qna.sFlag = true;
+						}
+					}else{
+						momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('<strong>目录信息</strong><br />连接失败。'); //<strong>리스트정보</strong>를<br /> 불러오지못했습니다.
+						momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+						return;
+					}
+				});
+			}else{
+				console.log('no more data');
+			}
+		}
+	}
+
+
+	// qna chat list init
+    momsSubTempFrame.qna.chatInit = function(){
+		// 댓글등록 입력폼 hide
+		momsSubTempFrame.qna.chatWrapper.find('.inquiry').hide();
+		momsSubTempFrame.qna.chatWrapper.find('.inquiry #re_qna_contents').val('');
+
+		var params = {
+			pqaid : momsSubTempFrame.qna.chatInit.pqaid
+		}
+
+		getAjaxPostData("getPQCommentList.do?", params, true, function(data){
+			console.log(data);
+			momsSubTempFrame.qna.chatWrapper.find('.chat-area .itemWrap').empty();
+
+			// 답변이 하나도 없을때
+			if(data.result.length == 0){
+				var chatDom = '';
+				momsSubTempFrame.qna.chatWrapper.find('.re_subject').text(momsSubTempFrame.qna.chatWrapper.firstComment.subject);
+				momsSubTempFrame.qna.chatWrapper.find('.re_root_date').text(momsSubTempFrame.qna.chatWrapper.firstComment.date);
+
+				chatDom += '<div class="questionItem" data-pqaid="'+momsSubTempFrame.qna.chatWrapper.firstComment.pqaid+'">';
+				chatDom += '<p class="q-stit re_contents">'+momsSubTempFrame.qna.chatWrapper.firstComment.comment+'</p>';
+				chatDom += '<div class="answer-box">';
+
+				chatDom += '<div class="wait page-center re_qna_state">';
+				chatDom += '<p data-kor="답변대기중입니다">正在等待回答。</p>';
+				chatDom += '</div>';
+
+				chatDom += '</div>';
+				chatDom += '</div>';
+
+				momsSubTempFrame.qna.chatWrapper.find('.chat-area .itemWrap').append(chatDom);
+			}else{
+				for(var i=0; i<data.result.length; i++){
+					var chatDom = '';
+
+					// 첫번째 질문답변 생성
+					if(i==0){
+						var t_date = cts_split((data.result[i].reg_date), ' ');
+						momsSubTempFrame.qna.chatWrapper.find('.re_subject').text(momsSubTempFrame.qna.chatWrapper.firstComment.subject);
+						momsSubTempFrame.qna.chatWrapper.find('.re_root_date').text(momsSubTempFrame.qna.chatWrapper.firstComment.date);
+
+						chatDom += '<div class="questionItem" data-pqaid="'+momsSubTempFrame.qna.chatWrapper.firstComment.pqaid+'" data-commentId="'+data.result[i].comment_id+'">';
+						chatDom += '<p class="q-stit re_contents">'+momsSubTempFrame.qna.chatWrapper.firstComment.comment+'</p>';
+						chatDom += '<div class="answer-box">';
+
+						chatDom += '<div class="reply_qnaWrap" data-tid="'+data.result[i].user_id+'">';
+						chatDom += '<div class="info" >';
+						chatDom += '<span class="thum"><img src="'+(lmsUrl+data.result[i].photo_path)+'" alt="" width="39" height="39"></span>';
+						chatDom += '<strong class="name"><i data-kor="선생님">'+data.result[i].user_name+'</i>老师</strong>';
+						chatDom += '<i class="date">'+t_date[0]+'</i>';
+						chatDom += '</div>';
+						chatDom += '<p class="answer">'+data.result[i].comment+'</p>';
+						chatDom += '</div>';
+
+						chatDom += '</div>';
+						chatDom += '</div>';
+
+						momsSubTempFrame.qna.chatWrapper.find('.chat-area .itemWrap').append(chatDom);
+					}else{		// 첫번째 외에 질문답변
+						// 학부모의 질문일 경우 HTML 생성
+						if(data.result[i].user_type == "P"){
+							var reg_date = cts_split((data.result[i].reg_date), ' ');
+							chatDom += '<div class="questionItem" data-commentId="'+data.result[i].comment_id+'" data-pqaid="'+momsSubTempFrame.qna.chatWrapper.firstComment.pqaid+'">';
+							chatDom += '<p class="add_reply_date">'+reg_date[0]+'</p>';
+							chatDom += '<p class="q-stit re_contents">'+data.result[i].comment+'</p>';
+							chatDom += '<div class="answer-box">';
+
+							if(i == (data.result.length-1)){
+								chatDom += '<div class="wait page-center re_qna_state" >';
+								chatDom += '<p data-kor="답변대기중입니다">正在等待回答。</p>';
+								chatDom += '</div>';
+							}
+
+							chatDom += '</div>';
+							chatDom += '</div>';
+
+							momsSubTempFrame.qna.chatWrapper.find('.chat-area .itemWrap').append(chatDom);
+						}else if(data.result[i].user_type == "T"){			// 선생님의 답변일 경우 HTML 생성
+							var a_date = cts_split((data.result[i].reg_date), ' ');
+							chatDom += '<div class="reply_qnaWrap" data-tid="'+data.result[i].user_id+'">';
+							chatDom += '<div class="info" >';
+							chatDom += '<span class="thum"><img src="'+(lmsUrl+data.result[i].photo_path)+'" alt="" width="39" height="39"></span>';
+							chatDom += '<strong class="name"><i data-kor="선생님">'+data.result[i].user_name+'</i>老师</strong>';
+							chatDom += '<i class="date">'+a_date[0]+'</i>';
+							chatDom += '</div>';
+							chatDom += '<p class="answer">'+data.result[i].comment+'</p>';
+							chatDom += '</div>';
+
+							momsSubTempFrame.qna.chatWrapper.find('.chat-area .itemWrap .answer-box:last').append(chatDom);
+						}
+					}
+				}
+			}
+			
+			// 하단 button set
+			if(momsSubTempFrame.qna.chatWrapper.find('.questionItem .answer-box:last').children().hasClass('reply_qnaWrap')){
+				momsSubTempFrame.qna.chatWrapper.find('.btn_bottom_wrapper').show();
+				momsSubTempFrame.qna.chatWrapper.find('.btn_bottom_wrapper .btn-block').hide();
+				momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_write').show();
+			}else{
+				momsSubTempFrame.qna.chatWrapper.find('.btn_bottom_wrapper').show();
+				momsSubTempFrame.qna.chatWrapper.find('.btn_bottom_wrapper .btn-block').hide();
+				momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_edit').show();
+				momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_delete').show();
+			}
+			momsSubTempFrame.qna.chatWrapper.find('.btn_re_qna_delete').show();
+		});
+	}
+
+    momsSubTempFrame.qna.init();
+});

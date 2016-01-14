@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="tch">
+	
+	
+	<select id="getUserList" resultType="com.digital.tch.china.vo.User" parameterType="com.digital.tch.china.vo.User">
+		SELECT
+		*
+		FROM t_user
+		WHERE user_id = #{user_id} and user_pw = #{user_pw} and scid!=0 and user_type='P'
+    </select>
+	<select id="getStudentInfo" resultType="com.digital.tch.china.vo.User" parameterType="com.digital.tch.china.vo.User">
+		
+	
+		SELECT *
+		FROM t_user
+		WHERE user_id = (
+		SELECT b.user_id
+		FROM t_user a,t_student_parents b
+		WHERE a.user_id=#{user_id} AND a.user_id = b.parent_id )
+    </select>
+	<select id="getUserInfo" resultType="com.digital.tch.china.vo.User" parameterType="com.digital.tch.china.vo.User">
+		
+	
+		SELECT *,(select code_name from t_code where code_group='33' and code_id=parent_job) as parent_job_name, 
+		(select code_name from t_code where code_group='31' and code_id=national) as national_name,
+		(SELECT name FROM t_originate WHERE oid=originate) as originate_name
+		FROM t_user a,(
+		    SELECT user_name as student_name 
+		FROM t_user
+		WHERE user_id = (
+		SELECT b.user_id
+		FROM t_user a,t_student_parents b
+		WHERE a.user_id=#{user_id} AND a.user_id = b.parent_id )) b
+		WHERE user_id = #{user_id}
+    </select>
+	
+	<insert id="updateParent" parameterType="com.digital.tch.china.vo.User" >
+	    UPDATE t_user SET
+			user_pw=#{user_pw},user_email=#{user_email},phone=#{phone},sex=#{sex},photo_path=#{photo_path},
+			birthday=#{birthday},address=#{address},sns=#{sns},parent_job=#{parent_job}
+		WHERE	user_id = #{user_id}
+	</insert>
+	
+	<select id="getNoticeList" resultType="com.digital.tch.china.vo.Notice" parameterType="com.digital.tch.china.vo.SearchCondition">
+		
+		SELECT (select code_name from t_code where code_id=a.speaker and code_group=23 ) as speaker,a.*,ifnull(C.nread_id,0) as new_cnt
+		FROM t_notice a left join t_notice_read C on ( a.nid = C.nid and C.user_id=#{user_id}),t_user b
+		WHERE  a.scid=b.scid AND  ( a.target like '%S%' or a.target like '%P%' )
+        AND b.user_id=#{user_id}
+        ORDER BY a.reg_date desc
+        LIMIT #{currentPage},#{recordCnt}
+    </select>
+    <select id="getNoticeFileList" resultType="com.digital.tch.china.vo.NoticeFile" parameterType="com.digital.tch.china.vo.Notice">
+	
+		SELECT *
+		FROM t_notice_file
+		WHERE nid = #{nid}
+	</select>
+	<select id="getAlarmList" resultType="com.digital.tch.china.vo.Alarm" parameterType="com.digital.tch.china.vo.SearchCondition">
+	
+		SELECT a.*,ifnull(C.aid,0) as new_cnt,b.subject,(select code_name from t_code where code_group='02' and code_id=b.subject) as subject_name
+		FROM t_alarm a left join t_alarm_read C on ( a.aid = C.aid and C.user_id=#{user_id} ) ,t_alarm_class b,
+		(SELECT * 
+		FROM t_user
+		WHERE user_id = (
+		SELECT b.user_id
+		FROM t_user a,t_student_parents b
+		WHERE a.user_id=#{user_id} AND a.user_id = b.parent_id ) ) c
+		WHERE a.aid =b.aid AND b.school_year=c.school_year AND b.class_no=c.class_no
+		ORDER BY a.reg_date desc
+		LIMIT #{currentPage},#{recordCnt}
+	</select>
+	<select id="getAlarmFileList" resultType="com.digital.tch.china.vo.AlarmFile" parameterType="com.digital.tch.china.vo.Alarm">
+	
+		SELECT *
+		FROM t_alarm_file
+		WHERE aid = #{aid}
+	</select>
+	<select id="getQaSubjectList" resultType="com.digital.tch.china.vo.QaSubject" parameterType="com.digital.tch.china.vo.QaSubject">
+	
+	
+		SELECT A.user_id as teacher_id,'00' as subject ,'班主任' as subject_name,A.class_no
+		FROM t_user A,(
+		SELECT school_year,class_no 
+		FROM t_user
+		WHERE user_id = (
+		SELECT b.user_id
+		FROM t_user a,t_student_parents b
+		WHERE a.user_id=#{parent_id} AND a.user_id = b.parent_id) )B
+		WHERE A.school_year = B.school_year AND A.class_no = B.class_no
+		AND A.user_type='T' AND A.teacher_charge='Y' AND A.is_delete='N'
+		
+		UNION
+		
+		SELECT A.user_id as teacher_id,A.duty_subject as subject,
+		(select code_name as subject_name from t_code where code_group='02' and code_id=A.duty_subject),
+		B.class_no
+		FROM t_teacher_duty A,t_user C,
+		(SELECT school_year,class_no 
+		FROM t_user
+		WHERE user_id = (
+		SELECT b.user_id
+		FROM t_user a,t_student_parents b
+		WHERE a.user_id=#{parent_id} AND a.user_id = b.parent_id ))B
+		WHERE A.duty_school_year = B.school_year AND A.duty_school_class_no = B.class_no
+		 AND A.user_id = C.user_id AND C.is_delete='N'
+	</select>
+	<insert id="insertParentQa" parameterType="com.digital.tch.china.vo.ParentQa" >
+	    INSERT INTO t_parent_qa ( parent_id,contents,subject,class_no,teacher_id )
+	    VALUES( #{parent_id},#{contents},#{subject},#{class_no},#{teacher_id})
+	</insert>
+	<update id="updateParentQa" parameterType="com.digital.tch.china.vo.ParentQa" >
+	    UPDATE t_parent_qa SET
+	    	contents=#{contents},reg_date=now()
+	    WHERE pqaid=#{pqaid}
+	</update>
+	<update id="deleteParentQa" parameterType="com.digital.tch.china.vo.ParentQa" >
+	    UPDATE t_parent_qa SET
+	     is_delete='Y'
+	    WHERE pqaid=#{pqaid}
+	</update>
+	<insert id="insertParentQaComment" parameterType="com.digital.tch.china.vo.ParentQa" >
+	    INSERT INTO t_parent_qa_comment ( pqaid,user_id,comment )
+	    VALUES( #{pqaid},#{user_id},#{comment})
+	</insert>
+	
+	
+	<select id="getParentQaList" resultType="com.digital.tch.china.vo.ParentQa" parameterType="com.digital.tch.china.vo.SearchCondition">
+	
+		SELECT a.*,count(b.pqaid)  as comment_cnt,ifnull(C.pqaid,0) as new_cnt
+		FROM t_parent_qa a left join t_parent_qa_comment b on ( a.pqaid = b.pqaid ) left join t_parent_qa_read C on ( a.pqaid = C.pqaid and C.user_id=#{user_id})
+		WHERE a.parent_id=#{user_id} AND a.is_delete='N'
+		GROUP BY a.pqaid
+		ORDER BY a.reg_date desc
+		LIMIT #{currentPage},#{recordCnt}
+	</select>
+	<select id="getPQCommentList" resultType="com.digital.tch.china.vo.ParentQa" parameterType="com.digital.tch.china.vo.ParentQa">
+	
+		SELECT a.*,b.user_name,b.user_type,b.photo_path
+		FROM t_parent_qa_comment a,t_user b
+		WHERE pqaid=#{pqaid} AND a.user_id=b.user_id
+		ORDER BY comment_id  
+	</select>     
+	<select id="getScheduleList" resultType="com.digital.tch.china.vo.Schedule" parameterType="com.digital.tch.china.vo.Schedule">
+		SELECT A.day,A.time_no,A.subject_id,
+		IF ( LENGTH(A.subject_id) &lt; 3 ,(select code_name from t_code where code_group='02' and code_id=A.subject_id) ,
+		(select code_name  from t_code where code_group='61' and code_id=A.subject_id)) as subject_name
+		FROM t_time_schedule A,(
+		SELECT school_year,class_no,scid 
+				FROM t_user
+				WHERE user_id = (
+				SELECT b.user_id
+				FROM t_user a,t_student_parents b
+				WHERE a.user_id=#{parent_id} AND a.user_id = b.parent_id )) B
+		
+		WHERE A.school_year=B.school_year AND A.class_no=B.class_no AND A.scid=B.scid
+
+
+		 
+	</select>  
+	<update id="updateParentQaComment" parameterType="com.digital.tch.china.vo.ParentQa" >
+	    UPDATE t_parent_qa_comment SET
+	    	comment =#{comment}
+	    WHERE comment_id = #{comment_id}
+	</update>
+	<delete id="deleteParentQaComment" parameterType="com.digital.tch.china.vo.ParentQa" >
+	    DELETE FROM  t_parent_qa_comment 
+	    WHERE comment_id = #{comment_id}
+	</delete>
+	
+	<insert id="insertNoticeRead" parameterType="com.digital.tch.china.vo.SearchCondition" >
+	    INSERT INTO t_notice_read ( nid,user_id )
+	    VALUES( #{key},#{user_id})
+	</insert>
+	<insert id="insertAlarmRead" parameterType="com.digital.tch.china.vo.SearchCondition" >
+	    INSERT INTO t_alarm_read ( aid,user_id )
+	    VALUES( #{key},#{user_id})
+	</insert>
+	<insert id="insertParentQaRead" parameterType="com.digital.tch.china.vo.SearchCondition" >
+	    INSERT INTO t_parent_qa_read ( pqaid,user_id )
+	    VALUES( #{key},#{user_id})
+	</insert>
+	<delete id="deleteParentQaRead" parameterType="com.digital.tch.china.vo.ParentQa" >
+	    DELETE FROM  t_parent_qa_read 
+	    WHERE pqaid = #{pqaid} AND user_id=#{user_id}
+	</delete>
+	
+	<select id="getNoticeNewCount" resultType="com.digital.tch.china.vo.Notice" parameterType="com.digital.tch.china.vo.SearchCondition">
+		
+		SELECT notice_cnt ,alarm_cnt ,qa_cnt FROM (
+
+			SELECT count(*) as notice_cnt  FROM (
+			SELECT ifnull(C.nread_id,0) as new_cnt
+					FROM t_notice a left join t_notice_read C on ( a.nid = C.nid and C.user_id=#{user_id}),t_user b
+					WHERE  a.scid=b.scid AND ( a.target like '%S%' or a.target like '%P%' )
+			        AND b.user_id=#{user_id} ) A
+			WHERE A.new_cnt = 0  ) M,(      
+ 
+        
+			SELECT count(*) as alarm_cnt FROM (        
+			SELECT ifnull(C.aid,0) as new_cnt
+					FROM t_alarm a left join t_alarm_read C on ( a.aid = C.aid and C.user_id=#{user_id} ) ,t_alarm_class b,
+					(SELECT * 
+					FROM t_user
+					WHERE user_id = (
+					SELECT b.user_id
+					FROM t_user a,t_student_parents b
+					WHERE a.user_id=#{user_id} AND a.user_id = b.parent_id ) ) c
+					WHERE a.aid =b.aid AND b.school_year=c.school_year AND b.class_no=c.class_no ) A
+			WHERE A.new_cnt = 0 ) N ,(
+			
+			SELECT count(*) as qa_cnt FROM (  
+				SELECT a.pqaid,count(*) as cnt FROM t_parent_qa a ,t_parent_qa_comment b
+				WHERE a.pqaid = b.pqaid and a.parent_id=#{user_id} group by a.pqaid) A 
+				left join t_parent_qa_read C on ( A.pqaid = C.pqaid and C.user_id=#{user_id})
+			WHERE ( cnt mod 2 ) != 0 AND C.pread_id is null ) K
+    </select>
+</mapper>

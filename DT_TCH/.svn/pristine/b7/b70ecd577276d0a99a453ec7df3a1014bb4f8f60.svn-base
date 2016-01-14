@@ -1,0 +1,39 @@
+package com.digital.tch.china.vo;
+
+public class Schedule {
+	private String day;
+	public String getDay() {
+		return day;
+	}
+	public void setDay(String day) {
+		this.day = day;
+	}
+	public int getTime_no() {
+		return time_no;
+	}
+	public void setTime_no(int time_no) {
+		this.time_no = time_no;
+	}
+	public String getSubject_id() {
+		return subject_id;
+	}
+	public void setSubject_id(String subject_id) {
+		this.subject_id = subject_id;
+	}
+	public String getSubject_name() {
+		return subject_name;
+	}
+	public void setSubject_name(String subject_name) {
+		this.subject_name = subject_name;
+	}
+	private int time_no;
+	private String subject_id;
+	private String subject_name;
+	private String parent_id;
+	public String getParent_id() {
+		return parent_id;
+	}
+	public void setParent_id(String parent_id) {
+		this.parent_id = parent_id;
+	}
+}

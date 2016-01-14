@@ -1,0 +1,60 @@
+package com.digital.tch.common.interceptor;
+
+import java.sql.Statement;
+import java.util.Properties;
+
+import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.plugin.Intercepts;
+import org.apache.ibatis.plugin.Invocation;
+import org.apache.ibatis.plugin.Plugin;
+import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
+
+@Intercepts(
+		{
+			@Signature(type=StatementHandler.class, method="update", args={MappedStatement.class, Object.class}),
+			@Signature(type=StatementHandler.class, method="query", args={MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class})
+		}
+)
+public class MybatisUpdateInterceptor implements Interceptor {
+
+	@Override
+	public Object intercept(Invocation invocation) throws Throwable {
+		// TODO Auto-generated method stub
+		
+		StatementHandler handler = (StatementHandler)invocation.getTarget();
+		String sql = handler.getBoundSql().getSql();
+		String param = handler.getParameterHandler().getParameterObject()!=null ? 
+                handler.getParameterHandler().getParameterObject().toString() : "";
+        System.out.println("sql : " + sql);
+        System.out.println("param : " + param);
+        
+		
+		MappedStatement mappedStatement = (MappedStatement)invocation.getArgs()[0];
+		String sqlId = mappedStatement.getId();
+		String methodName = invocation.getMethod().getName();
+		if("query".equals(methodName)){
+			
+		}else if("update".equals(methodName)){
+			
+		}
+		
+		return invocation.proceed();
+	}
+
+	@Override
+	public Object plugin(Object target) {
+		// TODO Auto-generated method stub
+		return Plugin.wrap(target, this);
+	}
+
+	@Override
+	public void setProperties(Properties properties) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

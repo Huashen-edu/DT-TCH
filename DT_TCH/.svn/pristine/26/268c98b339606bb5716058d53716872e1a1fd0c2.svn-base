@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>修改密码</title>
+	
+	
+	 <link rel="shortcut icon" href="../images/favicon.ico" />
+     <link type='text/css' rel="stylesheet" href="../css/reset.css" />
+     <link type='text/css' rel="stylesheet" href="../css/module.css" />
+    <link type='text/css' rel="stylesheet" href="../css/teacher.css" />
+    <link rel="stylesheet" href="/thirdparty/amazeui/css/amazeui.css" />
+
+    <script src="../js/common/jquery-2.1.3.js">
+    </script>
+    
+    <script type="text/javascript" src="../js/common/_config.js">
+    </script>
+    <script src="../util.js" type="text/javascript">
+    </script>
+
+    <script type="text/javascript" src="../js/common/cts_common.js">
+    </script>
+	 
+	
+<style type="text/css">
+#user_id_text{
+ background:#ffffff;
+     width: 100%;
+     height: 80px;
+     margin-top:20px;
+     font-size: 24px;
+     color:#323232;
+     line-height:80px;
+}
+ #user_password_input{
+     background:#ffffff;
+     width: 100%;
+     height: 80px;
+     margin-top:20px;
+      color:#0e90d2;
+      font-size:24px;
+      line-height:80px;
+}
+#user_repassword_input{
+ background:#ffffff;
+     width: 100%;
+     height: 80px;
+     color:#0e90d2;
+     font-size:24px;
+     line-height:80px;
+}
+#btnNext{
+position: relative;
+ background:#0e90d2;
+     width: 530px;
+     height: 88px;
+     margin-top:50px;
+      margin-left:55px;
+     text-align:center;
+     color:#ffffff;
+     font-size: 34px;
+     border:none;
+     border-radius: 8px;
+     line-height:88px;
+}
+.line{
+   height:1px;
+   background-color:#efeff4;
+    margin-left:160px;
+}
+div input{
+    border:none;
+    font-size: 24px;
+    margin-left:10px;
+}
+span{
+   display:inline-block;
+    width:150px;
+    text-align:right;
+}
+</style>	
+</head>
+<body style="background-color: #f7f7f7;">
+
+<div id="wrapper" class="page-center">
+      <div class="intro" style="display: none;">
+        <img src="../images/load_015s.gif" alt="" />
+      </div>
+ <!-- contain -->
+       <div id="container" style="display: none;">
+  <!-- 编码区 -->
+       <div id="user_id_text">
+        <span>用戶名</span><span id="user_name"></span>
+       </div>
+       <div id="user_password_input">
+       <span>新密码</span>
+       <input  type="password"
+                name="pass"
+                placeholder="请输入密码"/>
+       </div>
+       <div style="background-color: #ffffff;"><div class="line"></div></div>
+   <div id="user_repassword_input">
+        <span>确认密码</span>
+        <input type="password"
+                name="repass"
+                placeholder="请再次输入密码"/>
+       </div>
+        <div class="line"></div>
+   <div><button  href="javascript:void(0)"  id=btnNext>保存修改</button></div>    
+       
+ <!-- alert -->
+    <div class="alert" id="tch_login_alert" style="display: none;">
+      <p class="desc" data-kor="请重新确认您的用户名和密码。">
+      </p>
+
+      <div class="group-btn">
+        <a href="#" class="full" id="tch_authorize_alert_ok_btn" data-kor="确定">
+          确定
+        </a>
+      </div>
+    </div>
+    <!-- //alert -->
+    <!-- alert -->
+    <div class="alert" id="main_common_alert" style="display: none;">
+
+    </div>
+    <!-- //alert -->
+  </div>
+  <!-- //contain -->
+</div>
+</body>
+<script src="../js/weixin/updatepw.js">
+</script>
+</html>

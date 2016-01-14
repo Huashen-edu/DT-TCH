@@ -1,0 +1,15 @@
+@charset "UTF-8";
+
+
+.btn-fildAdd {
+	overflow: hidden; float: right; width: 45px; height: 33px; border: 1px solid #999;
+	background: #eaeaea url('../images/common/ui/fild_add.png') 50% 50% no-repeat;
+}
+
+
+.fileArea * {vertical-align: middle;}
+.fileArea {float: left; width: 870px;}
+.fileArea > img {position: relative; top: -2px;}
+.fileArea p {margin-top: 5px; font-size: 12px; line-height: 1;}
+.fileArea p:first-child {margin-top: 0;}
+.fileArea p .btn-file-delete {position: relative; top: -3px; margin-left: 7px; cursor: pointer;}

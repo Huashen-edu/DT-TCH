@@ -1,0 +1,55 @@
+
+var urlFlag = false;
+//var urlFlag = true;
+
+if(!urlFlag){
+
+	// api 요청 url
+	var apiUrl = 'http://localhost:5566/tch/';
+
+	// upload img url
+	var uploadUrl = 'http://localhost:5566/';
+
+	// lms 저장된 이미지 url
+	var lmsUrl = 'http://localhost:5050/';
+
+	// LMS API URL
+	var lmsApiUrl = 'http://localhost:5050/lms/';
+
+	// PCM SRVER
+	var pcmApiUrl = "http://localhost:8580/"
+
+	// chart
+	var CTS_CHART_HOST = "http://localhost:6767/";
+
+}else{
+
+	// api 요청 url
+	var apiUrl = "http://jlinesoft.ipdisk.co.kr:4040/moms/";
+
+	// upload img url
+	var uploadUrl = "http://jlinesoft.ipdisk.co.kr:4040/";
+
+	// lms 저장된 이미지 url
+	var lmsUrl = "http://jlinesoft.ipdisk.co.kr:5050/";
+
+	// LMS API URL
+	var lmsApiUrl = "http://jlinesoft.ipdisk.co.kr:5050/lms/";
+
+	// PCM SRVER
+	var pcmApiUrl = "http://jlinesoft.ipdisk.co.kr:8580/";
+
+	// chart
+	var CTS_CHART_HOST = "http://jlinesoft.ipdisk.co.kr:6767/";
+
+}
+
+
+
+if(window.jline){
+	apiUrl = window.jline.getMomsServerUrl()+"/moms/";
+	uploadUrl = window.jline.getMomsServerUrl();
+	lmsUrl = window.jline.getLmsServerUrl();
+	lmsApiUrl = window.jline.getLmsServerUrl()+"/lms/";
+	CTS_CHART_HOST = window.jline.getStatServerUrl();
+}

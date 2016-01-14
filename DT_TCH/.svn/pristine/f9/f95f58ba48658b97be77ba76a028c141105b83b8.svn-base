@@ -1,0 +1,135 @@
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="widstrong=device-widstrong,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0">
+    <title>
+      绑定账号
+    </title>
+    <link rel="shortcut icon" href="../images/favicon.ico" />
+    <link type='text/css' rel="stylesheet" href="../css/reset.css" />
+    <link type='text/css' rel="stylesheet" href="../css/module.css" />
+    <link type='text/css' rel="stylesheet" href="../css/teacher.css" />
+
+    <script src="../js/common/jquery-2.1.3.js">
+    </script>
+    <script type="text/javascript" src="../js/common/_config.js">
+    </script>
+    <script src="../util.js" type="text/javascript">
+    </script>
+
+    <script type="text/javascript" src="../js/common/cts_common.js">
+    </script>
+
+
+  </head>
+  <body style="background-color: #f9fafa;">
+
+    <div id="wrapper" class="page-center">
+      <div class="intro" style="display: none;">
+        <img src="../images/intro.png" alt="" />
+      </div>
+
+      <!-- contain -->
+      <div id="container" style="display: none;">
+
+        <!-- 코딩 영역 -->
+        <div class="login">
+          <section>
+            <ul>
+              <li>
+              <input type="text" name="userId" class="control-login" placeholder="用户名" data-kor="ID" />
+            </li>
+            <li>
+            <input type="password" name="pass" class="control-login" placeholder="密码" data-kor="PASSWORD" />
+          </li>
+        </ul>
+
+        <div class="chk-area">
+          <!--
+            <input type="radio" id="tch_student_check" name="usertype" value="学生" checked="checked" /> <label
+            for="tch_student_check" data-kor="学生"> 学生 </label>
+          -->
+          <input type="radio" id="tch_teacher_check" name="usertype" value="教师" checked="checked"  />
+          <label for="tch_teacher_check" data-kor="教师">
+            教师
+          </label>
+          <!--
+            <input type="radio" id="tch_parent_check" name="usertype" value="家长" /> <label for="tch_parent_check"
+            data-kor="家长"> 家长 </label>
+          -->
+
+        </div>
+
+        <div class="group-btn">
+          <a href="#" class="btn-round danger full" id="tch_login_btn" data-kor="로그인">
+            绑定账号
+          </a>
+        </div>
+
+        <div class="full-logo">
+          <img src="../images/common/full_logo.png" alt="DigitalTextbook" />
+        </div>
+
+        <p class="desc" data-kor="欢迎进入暖心妈妈微信端">
+          <strong>
+            欢迎使用
+          </strong>
+          <strong class="app">
+            家校通微信端
+          </strong>
+          。
+        </p>
+        <input 
+            type="text"
+            name="wxcode"
+            class="control-login"
+            style="display: none;"
+            placeholder="wxcode"
+            data-kor="wxcode"
+        />
+        <input 
+            type="text"
+            name="wxuserid"
+            class="control-login"
+            style="display: none;"placeholder="wxuserid"
+            data-kor="wxuserid"
+        />
+        <input 
+            type="text"
+            name="wxdeviceId"
+            class="control-login"
+            style="display: none;"
+            placeholder="wxdeviceId"
+            data-kor="wxdeviceId"
+        />
+      </section>
+
+
+    </div>
+    <!-- //코딩 영역 -->
+
+    <!-- alert -->
+    <div class="alert" id="tch_login_alert" style="display: none;">
+      <p class="desc" data-kor="请重新确认您的用户名和密码。">
+      </p>
+
+      <div class="group-btn">
+        <a href="#" class="btn-round danger full" id="tch_authorize_alert_ok_btn" data-kor="확인">
+          确认
+        </a>
+      </div>
+    </div>
+    <!-- //alert -->
+    <!-- alert -->
+    <div class="alert" id="main_common_alert" style="display: none;">
+
+    </div>
+    <!-- //alert -->
+  </div>
+  <!-- //contain -->
+</div>
+</body>
+
+<script src="../js/weixin/authorize.js">
+</script>
+</html>

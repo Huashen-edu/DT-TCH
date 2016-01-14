@@ -1,0 +1,91 @@
+package com.digital.tch.china.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.digital.tch.china.vo.AccessToken;
+import com.digital.tch.china.vo.Alarm;
+import com.digital.tch.china.vo.AlarmFile;
+import com.digital.tch.china.vo.Notice;
+import com.digital.tch.china.vo.NoticeFile;
+import com.digital.tch.china.vo.ParentQa;
+import com.digital.tch.china.vo.QaSubject;
+import com.digital.tch.china.vo.Schedule;
+import com.digital.tch.china.vo.SearchCondition;
+import com.digital.tch.china.vo.TchAlarm;
+import com.digital.tch.china.vo.User;
+import com.digital.tch.china.vo.WXUserInfo;
+
+public interface TchService {
+	public User getUserList(User admin) throws Exception;
+
+	public User getUserInfo(User user) throws Exception;
+
+	public User getStudentInfo(User user) throws Exception;
+
+	public int updateParent(User user) throws Exception;
+
+	public List<Notice> getNoticeList(SearchCondition condition)
+			throws Exception;
+
+	public List<NoticeFile> getNoticeFileList(Notice notice) throws Exception;
+
+	public List<Alarm> getAlarmList(SearchCondition condition) throws Exception;
+
+	public List<QaSubject> getQaSubjectList(QaSubject subject) throws Exception;
+
+	public int insertParentQa(ParentQa qa) throws Exception;
+
+	public int updateParentQa(ParentQa qa) throws Exception;
+
+	public int deleteParentQa(ParentQa qa) throws Exception;
+
+	public int insertParentQaComment(ParentQa qa) throws Exception;
+
+	public List<ParentQa> getParentQaList(SearchCondition condition)
+			throws Exception;
+
+	public List<ParentQa> getPQCommentList(ParentQa qa) throws Exception;
+
+	public List<Schedule> getScheduleList(Schedule sch) throws Exception;
+
+	public int updateParentQaComment(ParentQa qa) throws Exception;
+
+	public int deleteParentQaComment(ParentQa qa) throws Exception;
+
+	public int insertNoticeRead(SearchCondition condition) throws Exception;
+
+	public int insertAlarmRead(SearchCondition condition) throws Exception;
+
+	public int insertParentQaRead(SearchCondition condition) throws Exception;
+
+	public List<AlarmFile> getAlarmFileList(Alarm alarm) throws Exception;
+
+	public Notice getNoticeNewCount(SearchCondition cond) throws Exception;
+
+	public AccessToken getAccessToken() throws Exception;
+
+	public WXUserInfo getWXUserInfo(WXUserInfo wxUserInfo) throws Exception;
+
+	public int setAuthorize(WXUserInfo wxUserInfo) throws Exception;
+
+	public Notice getNoticeInfo(Notice paramNotice) throws Exception;
+
+	public Alarm getAlarmInfo(Alarm alarm) throws Exception;
+	
+	public int getAlarmListBySubjectTeacherTotalCount(Map<String, Object> map) throws Exception;
+	
+	public List<TchAlarm> getAlarmListBySubjectTeacher(Map<String, Object> map) throws Exception;
+	
+	public List<User> getAddressBookStudentsList(Map<String, Object> map) throws Exception;
+
+	public User getUserFromWX(User user) throws Exception;
+	
+	public List<Notice> getTchNoticeList(Map<String, Object> map) throws Exception;
+	
+	public int addAlarm(Map<String,String> map) throws Exception;	
+	public int addAlarmClass(Map<String,String> map) throws Exception;
+	public int addAlarmFile(Map<String,String> map) throws Exception;
+	public int addAlarmToStudents(Map<String,String> map) throws Exception;
+
+}

@@ -1,0 +1,1827 @@
+//moms.polling.stop();
+
+s_defaultInfo = localStorage.getObject("s_defaultInfo");
+
+var _a = {};
+var __EVENT_TYPE  = "click";
+//var __USER_ID = "lms_admin";
+var __USER_ID = s_defaultInfo.user_id//"ms04";
+var __USER_SCID  = s_defaultInfo.scid//"34";
+var __USER_TYPE = "S";//"S";
+var __USER_SCHOOL_YEAR = s_defaultInfo.school_year;//"08";
+var __USER_CLASS_NO = s_defaultInfo.class_no;//"02";
+var __USER_STUDENT_NO = s_defaultInfo.student_no;//"04";
+var __USER_NAME = s_defaultInfo.user_name;//"학생이름";//s_defaultInfo.user_name;
+//var __NOW_TARGET_MODE = "LM";
+var __NOW_TARGET_MODE = "SS";
+
+(function(__THIS, __W){
+	/**
+	 * Global Variable 
+	 */
+	__THIS.__CONFIG = {};
+	__THIS.__DATA = null;
+	__THIS.__DOM = {};
+	var __HOST = "localhost";
+	var __DOM = {};
+	var __CONFIG = {
+		mode : "",								//현제 통계가 어디모드일지
+		label : "",								//테이
+		table_label : "",						//테이블 라벨
+		chart_type : "",						//현재 볼 차트 타입
+		chart_list : "",						//사용가능 차트 종류
+		user_id : __USER_ID,					//아이디
+		scid : __USER_SCID,							//학교번호
+		user_type : __USER_TYPE,				//회원통계 -  조회하려는 사용자 구분 타입
+		stat_type : "",							//요청 구분 값
+		school_year : "00",						//학년
+		class_no : "00",						//반
+		student_id : "00" ,
+		target : __NOW_TARGET_MODE, 			//지육 - 
+		subject : "",							//지육 - 과목번호
+		extend : "" , 							//확장 여분 옵션
+	}
+
+
+	/**
+	 * Initialize Code =========================================================
+	 */
+	function initialize( mode, selectList ){
+
+		console.info("================================\nREPORT - Initialize" , arguments, "\n================================")
+		init_var(mode);
+		init_dom(__DOM);
+		setcts_report_subjectObj(function(){
+			init_class_selectbox(function(){
+				init_select_box( selectList );	
+				init_event();
+				try{
+					__CONFIG.school_year = __DOM.classListZone.find("[school_year]").val();
+				}catch(e){
+
+				}
+			});	
+		})
+		
+	};
+
+
+	/**
+	 * [init_var description]
+	 * 클래스 글로벌 변수 초기화
+	 * @param  {[type]} mode [description]
+	 * @return {[type]}      [description]
+	 */
+	function init_var(mode){
+		__CONFIG = {
+			mode : "",								//현제 통계가 어디모드일지
+			label : "",								//테이
+			table_label : "",						//테이블 라벨
+			chart_type : "",						//현재 볼 차트 타입
+			chart_list : "",						//사용가능 차트 종류
+			user_id : __USER_ID,					//아이디
+			scid : "34",							//학교번호
+			user_type : __USER_TYPE,				//회원통계 -  조회하려는 사용자 구분 타입
+			stat_type : "",							//요청 구분 값
+			school_year : "00",						//학년
+			class_no : "00",						//반
+			student_id : "00" ,
+			target : __NOW_TARGET_MODE, 			//지육 - 
+			subject : "",							//지육 - 과목번호
+			extend : "" , 							//확장 여분 옵션
+		}
+		__THIS.__CONFIG = __CONFIG;
+		__THIS.__DOM = __DOM;
+		__CONFIG.mode = mode;
+	};
+
+
+	/**
+	 * [init_dom description]
+	 * DOM Element 변수 설정..
+	 * @param  {[type]} el [description]
+	 * @return {[type]}    [description]
+	 */
+	function init_dom(el){
+		el.containor = $(".cts-r-containor");
+		el.heads;
+		el.loading = el.containor.find("cts-loading").hide();
+		el.headerZone = el.containor.find("[cts-r-h-area]");
+		el.selectBoxZone = el.containor.find("[cts-r-h-optbox-area]");
+		el.classListZone = el.containor.find("[cts-r-h-classlistbox-area]").css("display" , "inline-block").hide();
+		el.tableZone = el.containor.find("[cts-content-table-area]").hide();
+		el.chartWrap = el.containor.find(".cts-content-chart-area"); 
+		el.chartZone = el.containor.find("[cts-content-chart-area]");
+		el.buildReport = el.containor.find("[cts-build-report]").show();
+		el.buttonArea = el.containor.find(".cts-r-h-button-area");
+		el.chartIconArea = el.chartWrap.find(".chart_icon");
+		el.contents;
+	};
+
+
+	/**
+	 * [init_event description]
+	 * 글로벌 event 정의
+	 * @return {[type]} [description]
+	 */
+	function init_event(){
+		//조회버튼 클릭시
+		__DOM.buildReport.unbind(__EVENT_TYPE).on(__EVENT_TYPE , function(event){
+			event.preventDefault();
+			console.debug("build Report", __CONFIG.mode, __CONFIG);
+			__DOM.chartIconArea.find("[diffarea]").remove();
+			//학생모드일 경우
+			if(__CONFIG.target=="SS"){
+				__CONFIG.school_year = __USER_SCHOOL_YEAR;
+				__CONFIG.class_no = __USER_CLASS_NO;
+				__CONFIG.student_id = __USER_ID;
+			}
+			ctsChartBuild[__CONFIG.mode]();
+			__DOM.containor.find("cts-fisrt-view").hide();
+		});
+		//차트내용 다르게 보기
+		__DOM.buttonArea.find("[cts-chart-build]").unbind(__EVENT_TYPE).on(__EVENT_TYPE , function(event){
+			var type = $(this).attr("cts-chart-build");
+			if(!type){ return };
+			setTimeout(function(){ __THIS.chart.makeChart(type) },0);
+		});
+	};
+
+
+
+	/**
+	 * [init_class_selectbox description]
+	 * 학년 반 선택 화면을 나타낸다..
+	 * @param  {Function} callback [description]
+	 * @return {[type]}            [description]
+	 */
+	function init_class_selectbox(callback){
+		var url = cts.Chart.requestURL.class_list;
+		requestAjax(url, __CONFIG, "POST")
+			.then(function(data){
+				//console.info("class_list" , data);
+				__CONFIG.school_year_list = data.data;
+				console.debug("init_class_selectbox==>data", data);
+				var year_list = makeHtml("school_year", data.data, data.detailMap);
+				var class_list = makeHtml("class_no", data.detail || []);
+				var student_list = makeHtml("student", []).attr("disabled" , true);
+				//셀렉트 박스 HTML 생성
+				
+				__DOM.classListZone.empty().append( year_list, class_list, student_list);
+				year_list.change();
+				callback();
+			})
+			.fail(function(data){
+				if( __CONFIG.target=="SS"){
+					var school_obj = [{ code_group: null,code_id: __CONFIG.school_year,code_name: parseInt(__CONFIG.school_year)+"年级" }];
+					var class_obj = [{ code_group: null,code_id: __CONFIG.class_no,code_name: parseInt(__CONFIG.class_no)+"班" }];
+					var student_obj = [{ student_no: __USER_STUDENT_NO, user_id: __USER_ID, user_name: __USER_NAME || "" }];
+
+					var year_list = makeHtml("school_year", school_obj);
+					var class_list = makeHtml("class_no", class_obj);
+					var student_list = makeHtml("student", student_obj);
+
+					__DOM.classListZone.empty().append( year_list, class_list, student_list);
+					callback();
+				}
+			});
+
+
+			function makeHtml(state,data , detailMap){
+				var label = (state == "school_year") ? "年级全部" : (state == "class_no") ? "班级全部" : "全体学生";
+				var html = $("<select class='control form-control' "+state+"></select>");
+				if(
+					__CONFIG.mode == "member" || 
+					( ( __CONFIG.mode == "learn" || __CONFIG.mode == "artmusic" || __CONFIG.mode == "physical") && state != "school_year" ) 
+				){
+					html.append("<option value='00'>"+label+"</option>");
+				}
+				data.forEach(function(d){
+					var opt_item = $("<option value='"+d.code_id+"''>"+d.code_name+"</option>");
+					html.append( opt_item );
+				});
+				html.change(function(){
+					__CONFIG[state] = $(this).val() || "00";
+					//반 추가모듈
+					if( __CONFIG.target != "CT" && state =="school_year"){
+						var class_obj = detailMap[$(this).val()] || [];
+						var class_list = makeHtml("class_no", class_obj);
+						__DOM.classListZone.find("[class_no]").replaceWith( class_list );
+					};
+					if( __CONFIG.target != "CT" && __CONFIG.mode != "member" && __CONFIG.school_year && __CONFIG.class_no && state !="student" ){
+						__CONFIG.school_year = __DOM.classListZone.find("[school_year]").val();
+						//__CONFIG.class_no = __DOM.classListZone.find("[class_no]").val();
+						requestStudent(  __DOM.classListZone.find("[student]") );
+					};
+					//LMS에서 학년을 선택 시 과목리스트 변경
+					if( __CONFIG.target !="CT" && state == "school_year" && __CONFIG.mode == "learn"){
+						__DOM.selectBoxZone.find("[cts-select-subject]").empty();
+						cts_chart_subjectlist( __CONFIG.target , __CONFIG.school_year ).forEach(function(data){
+							var html = $("<option value="+data.code+">"+data.name+"</option>");
+							__DOM.selectBoxZone.find("[cts-select-subject]").append(html);
+						});
+					}
+				});
+				//1. 리스트가 없거나 2. state 값이 학생이 아닐때 3. 담임모드가 아니고.. 빈값으로 생성..
+				if(
+					__CONFIG.target != "CT" && 
+					data.length ==0 && 
+					( __CONFIG.mode == "member" ) 
+					//( __CONFIG.mode == "member" || state !="student" ) 
+				){
+					html = $("<span></span>");
+				}
+				//담임모드일 경우
+				if( __CONFIG.target == "CT" || __CONFIG.target == "SS" ){
+					var code = "";
+					var label = "";
+					if( state == "school_year" ){
+						__CONFIG.school_year = __USER_SCHOOL_YEAR;
+						code = __CONFIG.school_year;
+						label = "年";
+						html.html("<option value="+code+">"+parseInt(code)+label+"</option>").attr("disabled" , true);
+					}
+					if( state == "class_no"){
+						__CONFIG.class_no = __USER_CLASS_NO;
+						code = __CONFIG.class_no;
+						label = "班";
+						html.html("<option value="+code+">"+parseInt(code)+label+"</option>").attr("disabled" , true);
+					}
+					if( state =="student"){
+						if(__CONFIG.target == "CT"){
+							requestStudent( html );	
+						}else{
+							html.html("<option value="+data[0].student_id+">"+data[0].student_no+". "+data[0].user_name+"</option>").attr("disabled" , true);
+						}
+					}
+				}
+				return html;
+			};
+
+			function requestStudent(student_list){
+				requestAjax( cts.Chart.requestURL.student_list , __CONFIG, "POST").then(function(data){
+					//console.log("data",data);
+					student_list.find(".std_options").remove();
+					student_list.attr("disabled" , (data.data.length > 0) ? false : true);
+					if(data.data.length == 0){
+						return;
+					}
+					data.data.forEach(function(std){
+						var item = $("<option class='std_options' value="+std.user_id+">"+std.student_no+". "+std.user_name+"</option>").data(data);
+						student_list.append(item);
+					});
+					student_list.change(function(){
+						__CONFIG.student_id = $(this).val();
+					});
+					console.info("student_list" , student_list);
+				});
+			}
+	};
+
+
+
+	/**
+	 * [init_select_box description]
+	 * 셀렉트 박스 세팅..
+	 * @param  {[type]} baseVar [description]
+	 * @return {[type]}         [description]
+	 */
+	function init_select_box(baseVar){
+		var ctsChartSelect = {
+			member : function(baseVar){
+				//LMS와 담임선생이 아니라면 교사 선택 막기
+				if(__CONFIG.target !="LM" && __CONFIG.target !="CT" ) baseVar.shift();
+				
+				//select box를 생성 한후 관리한다.
+				function setSelect(obj, depth){
+					var area = __DOM.selectBoxZone.find("[dept_"+depth+"]").empty();
+					if(! area.length){
+						area = $("<span class='control form-control' dept_"+depth+"></span>");
+						__DOM.selectBoxZone.append(area);
+					}
+					var select = makeHtml(obj);
+					//select box 이벤트 관리
+					select.change(function(){
+						var val = $(this).val();
+						var d = $(this).find("option:selected").data();
+						if( __CONFIG[d.match] != undefined){
+							__CONFIG[d.match] = val;
+						}
+						__CONFIG.label = $(this).find("option:selected").text();
+						__CONFIG.table_label = d.table_label;
+						__CONFIG.chart_type = d.chart_type;
+						__CONFIG.chart_list = d.chart_list;
+						//학년선택 내용 보이고 숨기기
+						if( d.class_select && typeof d.class_select =="object"){
+							if(d.class_select[0] == true){
+								__DOM.classListZone.find("[school_year]").show();
+							}else{
+								__DOM.classListZone.find("[school_year]").hide();
+								__DOM.classListZone.find("[student]").hide();
+							}
+							if(d.class_select[1] == true){
+								__DOM.classListZone.find("[class_no]").show();
+							}else{
+								__DOM.classListZone.find("[class_no]").hide();
+								__DOM.classListZone.find("[student]").hide();
+							}
+							__DOM.classListZone.show();
+						}
+						if(d.info){ setSelect( d.info, d.depth ); }
+					});
+					//change event 
+					area.append(select);
+					select.change();
+				};
+				__DOM.selectBoxZone.empty();
+				setSelect(baseVar, 0);
+				__DOM.buildReport.show();
+			},
+			learn : function(baseVar, depth){
+				console.info("baseVar" , baseVar, depth);
+				__DOM.classListZone.show().find("select").show();
+				var subjectItem = baseVar[0];
+				var dataItem = baseVar[1];
+				//var subjectSelect = makeHtml( subjectItem.value ).attr("cts-select-subject", "");
+				var nowSchoolYear = ( __CONFIG.target =="CT" || __CONFIG.target =="SS") ? __USER_SCHOOL_YEAR : __CONFIG.school_year_list[0].code_id;
+				var subjectSelect = makeHtml( cts_chart_subjectlist( __CONFIG.target, nowSchoolYear ) ).attr("cts-select-subject" , "");
+				var dataSelect = makeHtml(dataItem.value ).attr("cts-select-datakind" , "");
+				dataSelect.change(function(){
+					var area = __DOM.selectBoxZone.find("[dept_"+depth+"]").empty();
+					if(! area.length){
+						area = $("<span class='control form-control' dept_"+depth+"></span>");
+						__DOM.selectBoxZone.append(area);
+					}
+					var val = $(this).val();
+					var d = $(this).find("option:selected").data();
+					__CONFIG.label = $(this).find("option:selected").text();
+					if(d.info){
+						var two = makeHtml( d.info, d.depth ).attr("datakind_detail", "");
+						area.append( two );
+					}
+				});//change
+				__DOM.selectBoxZone.append(subjectSelect , dataSelect);
+				__DOM.selectBoxZone.appendTo( __DOM.headerZone );
+				dataSelect.change();
+			},
+			artmusic : function(baseVar, depth){
+				__DOM.classListZone.show().find("select").show();
+				var item = baseVar[0];
+				var itemSelect = makeHtml( item.value ).attr("cts-select-data-kind","");
+				itemSelect.change(function(){
+					var d = $(this).find("option:selected").data();
+					__CONFIG.label = $(this).find("option:selected").text();
+					__CONFIG.stat_type = $(this).val();
+				});
+				__DOM.selectBoxZone.append(itemSelect);
+				__DOM.selectBoxZone.appendTo( __DOM.headerZone );
+				itemSelect.change();
+			},//artmusic
+			physical : function(baseVar , depth){
+				__DOM.classListZone.show().find("select").show();
+				var selectDom;
+				baseVar.forEach(function(selectItem){
+					selectDom = makeHtml( selectItem.value ).attr("cts-select-data-kind","");
+					selectDom.change(function(){
+						var info = $(this).find("option:selected").data();
+						__DOM.selectBoxZone.find("[cts-select-data-kind2]").remove();
+						if(info.info.length > 0){
+							var secondDom = makeHtml(info.info).attr("cts-select-data-kind2","");
+						}
+						__CONFIG.stat_type = $(this).val();
+						__DOM.selectBoxZone.append(secondDom);
+					});
+				});
+				__DOM.selectBoxZone.append(selectDom);
+				__DOM.selectBoxZone.appendTo( __DOM.headerZone );
+				selectDom.change();
+			},//physical
+
+		}
+		
+		//html 생성
+		function makeHtml(objArray){
+			var html = $("<select class='control form-control'></select>");
+			//html.append("<option>선택해주세요.</option>");
+			objArray.forEach(function(d){
+				var options = $("<option value="+ d.code +">"+ d.name +"</option>")
+								.data({ 
+									"info" : d.value , 
+									"depth" : d.depth , 
+									"match" : d.match, 
+									"method"  : d.method,
+									"table_label" : d.table_label, 
+									"chart_type" : d.d_type,
+									"class_select" : d.class_select,
+									"chart_list" : d.d_list,
+									"subject" : d.subject,
+								});
+				html.append(options);
+			});
+			if( objArray.length == 0){
+				html.hide();
+			}
+			return html;
+		};
+
+		ctsChartSelect[__CONFIG.mode](baseVar);
+	};
+
+
+	//빌드 방법
+	var ctsChartBuild = {
+		member : function(){
+			console.info("CTSCHARTBUILD -> MEMBER");
+			var url = cts.Chart.requestURL[__CONFIG.mode];
+			if( __CONFIG.stat_type == "01" && __CONFIG.user_type =="T"){
+				__CONFIG.class_no ="00";
+			}else if(__CONFIG.target =="CT" && __CONFIG.user_type !="T"){
+				__CONFIG.class_no =__USER_CLASS_NO;
+			}
+
+			requestAjax(url, __CONFIG, "POST").then(function(data){
+				__THIS.__DATA = data;
+				settingDataExtendProperty();
+				__DOM.buttonArea.find("[cts-chart-build]").hide();
+				__CONFIG.chart_list.forEach(function(type){
+					if(type != "")
+						__DOM.buttonArea.find("[cts-chart-build="+type+"]").show();
+				});
+				var tableHtml = __THIS.table.init( __CONFIG.table_label);
+				var chart = __THIS.chart.init( __CONFIG.chart_type);
+				__DOM.tableZone.empty().append(tableHtml);
+			});
+		},//ctsChartBuild.member
+		learn : function(){
+			console.info("CTSCHARTBUILD -> LEARN");
+			var url = cts.Chart.requestURL[__CONFIG.mode];
+			var build_condition1 = __DOM.selectBoxZone.find("[cts-select-datakind]").val() || "";
+			var build_condition2 = __DOM.selectBoxZone.find("[datakind_detail]").val() || "";
+			var build_condition = build_condition1 + build_condition2; 
+			__CONFIG.stat_type = build_condition;
+			__CONFIG.subject = __DOM.selectBoxZone.find("[cts-select-subject]").val() || "00";
+			if(build_condition1 == "attd"){
+				url = cts.Chart.requestURL.learn_attd;
+			}else if(build_condition2 == "rank"){
+				__CONFIG.stat_type = "5"+build_condition1;
+				url = cts.Chart.requestURL.learn_rank;
+			}else{
+				
+			}
+			__CONFIG.chart_list = ["bar","line"];
+			__CONFIG.chart_list.forEach(function(type){
+				if(type != "")
+					__DOM.buttonArea.find("[cts-chart-build="+type+"]").show();
+			});
+
+			requestAjax(url, __CONFIG, "POST").then(function(data){
+				console.debug("BUILD RESULT" , data);
+				__THIS.__DATA = data;
+				settingDataExtendProperty();
+				if( build_condition2 != "rank" ){
+					__DOM.tableZone.hide();
+					__DOM.chartWrap.show();
+					__THIS.chart.init( "bar" );
+				}else{
+					__DOM.chartWrap.hide();
+					__DOM.tableZone.show();
+				}
+				var tableHtml = __THIS.table.init( tableLabelMake(build_condition1, build_condition2) );
+				__DOM.tableZone.empty().append(tableHtml);
+			});	
+		},//learn
+		artmusic : function(){
+			console.info("CTSCHARTBUILD -> ARTMUSIC");
+
+			var url = cts.Chart.requestURL[__CONFIG.mode];
+			var build_dom = __DOM.selectBoxZone.find("[cts-select-data-kind]");
+			var build_condition = build_dom.val() || "";
+			var build_data = build_dom.find("option:selected").data();
+
+			__CONFIG.stat_type = build_condition;
+			__CONFIG.subject = build_data.subject;
+			if(build_data.method == "getArtMusic"){
+				url = cts.Chart.requestURL.artmusic;
+			}else if(build_data.method =="getArtMusicEval"){
+				url = cts.Chart.requestURL.artmusic_eval;
+			}else if(build_data.method == "getMentalAttendance"){
+				url = cts.Chart.requestURL.artmusic_attd;
+			}
+			__CONFIG.chart_list = ["bar","line"];
+			__CONFIG.chart_list.forEach(function(type){
+				if(type != "")
+					__DOM.buttonArea.find("[cts-chart-build="+type+"]").show();
+			});
+			requestAjax(url, __CONFIG, "POST").then(function(data){
+				console.debug("BUILD RESULT" , __CONFIG, url , "======>",data);
+				__THIS.__DATA = data;
+				settingDataExtendProperty();
+				__DOM.chartWrap.show();
+				var tableHtml = __THIS.table.init( tableLabelMake( "artmusic" , build_data) );
+				__DOM.tableZone.empty().append(tableHtml);
+				__THIS.chart.init( "bar" );
+			});
+			//console.debug("conditions"  , build_data, url);
+		},//artmusic
+		physical : function(){
+			var url = cts.Chart.requestURL[__CONFIG.stat_type];
+			var build_data = __DOM.selectBoxZone.find("[cts-select-data-kind] option:selected").data();
+			if(__CONFIG.stat_type != "getPhysicalTestStat"){
+				__CONFIG.stat_type = __DOM.selectBoxZone.find("[cts-select-data-kind2]").val();
+				build_data = __DOM.selectBoxZone.find("[cts-select-data-kind2] option:selected").data();
+				url = cts.Chart.requestURL.getPhysicalConstitution;
+			}
+			requestAjax(url, __CONFIG, "POST").then(function(data){
+				console.info("CTSCHARTBUILD -> PHYSICAL", __CONFIG, "====>", data);
+				__THIS.__DATA = data;
+				settingDataExtendProperty();
+				if(__CONFIG.stat_type != "15" && __CONFIG.stat_type !="16") makeDiffSelect( );
+				if(__CONFIG.stat_type == "getPhysicalTestStat" || __CONFIG.stat_type.toString() == "14"){
+					__CONFIG.chart_list = [];
+					var tableHtml = __THIS.table.init( tableLabelMake( "physical" , build_data) );
+					__DOM.tableZone.empty().append(tableHtml);	
+				}else{
+					__CONFIG.chart_list = ["bar","line"];
+					var tableHtml = __THIS.table.init( tableLabelMake( "physical" , build_data) );
+					__DOM.tableZone.empty().append(tableHtml);	
+				}
+				__DOM.buttonArea.find("[cts-chart-build]").hide();
+				__CONFIG.chart_list.forEach(function(type){
+					if(type != "")
+						__DOM.buttonArea.find("[cts-chart-build="+type+"]").show();
+				});
+				__DOM.chartWrap.show();
+				__THIS.chart.init( build_data.chart_type );
+				__THIS.chart.chartObject.reflow()
+			});
+		},
+	};//ctsChartBuild
+
+
+	function makeDiffSelect( ){
+		var wrap = $("<div diffarea></div>");
+		
+		if(__CONFIG.mode == "physical"){
+			if(__CONFIG.stat_type == "getPhysicalTestStat"){
+				var thisme = $("<p class='colorLabel'><span></span><span></span></p><select><option>나 자신</option></select>").appendTo(wrap);
+				var diff_select = $("<p class='colorLabel'><span></span><span></span></p><select spider-chart-diff-data></select>").appendTo(wrap);
+				if( __THIS.__DATA.detailMap.school_year_avg ){
+					var diffItem =  __THIS.__DATA.detailMap.school_year_avg;
+					var diff_option = $("<option></option>").appendTo( diff_select.eq(1) );
+					diff_option.text( diffItem.name );
+					diff_option.data( diffItem );
+				}
+				if( __THIS.__DATA.detailMap.class_no_avg){
+					var diffItem =  __THIS.__DATA.detailMap.class_no_avg;
+					var diff_option = $("<option></option>").appendTo( diff_select.eq(1) );
+					diff_option.text( diffItem.name );
+					diff_option.data( diffItem );
+				}
+				for(var k in __THIS.__DATA.detailMap){
+					if( k != "school_year_avg" && k != "class_no_avg"){
+						var diffItem =  __THIS.__DATA.detailMap[k];
+						var diff_option = $("<option></option>").appendTo( diff_select.eq(1) );
+						diff_option.text( diffItem.name );
+						diff_option.data( diffItem );
+					}
+				};
+				//이름 설정
+				
+				var name = "";
+				if(__THIS.__CONFIG.student_id != "00"){
+					name = __THIS.__DOM.classListZone.find("[student] option:selected").text();
+				}else if(__THIS.__CONFIG.student_id == "00" && __THIS.__CONFIG.class_no != "00"){
+					name = __THIS.__DOM.classListZone.find("[class_no] option:selected").text()+" 平均";
+				}else{
+					name = __THIS.__DOM.classListZone.find("[school_year] option:selected").text()+"年级平均";
+				}
+				thisme.eq(1).attr("disabled" , true).find("option").text( name );
+				thisme.eq(0).find("span").css( "background" , Highcharts.setOptions().colors[0]);
+				diff_select.eq(0).find("span").css( "background" , Highcharts.setOptions().colors[1]);
+				diff_select.change(function(){
+					//__THIS.chart.makeChart();
+					__THIS.table.refresh();
+				});
+			}else{
+				var color_label = $("<p class='colorLabel'><span></span><span style='display:none'></span></p>").appendTo( wrap );
+				color_label.find("span").css( "background" , "red");
+				var depth_1 = $("<select></select>").change(changePlotLineChange).appendTo( wrap );
+				var depth_2 = $("<select></select>").css({"margin-left" : "10px" }).change(changePlotLineChange).appendTo( wrap );
+				[ ["学校平均","1"] , ["年级平均","2"] , ["班级平均","3"]].forEach(function(item){
+					depth_1.append("<option value="+item[1]+">"+item[0]+"</option>");
+				});
+				[ ["全部","1"] , ["男","2"] , ["女","3"]].forEach(function(item){
+					depth_2.append("<option value="+item[1]+">"+item[0]+"</option>");
+				});
+				function changePlotLineChange(){
+					var stateval = depth_1.val()+""+depth_2.val();
+					var target = arrayObjectFindItem( __THIS.__DATA.detail , "item_name" , stateval);
+					//console.debug("changePlotLineChange", target);
+					__THIS.__DATA_AVRG = target;
+					var build_data = __DOM.selectBoxZone.find("[cts-select-data-kind2] option:selected").data();
+					__THIS.table.refresh();
+				};
+				try{
+					changePlotLineChange();
+				}catch(e){}
+			}	
+		}
+		__DOM.chartIconArea.append( wrap );
+	};
+
+
+	function tableLabelMake(c1, c2){
+		//console.debug("tableLabelMake - " , c1, c2);
+		var result = [];
+		if( c1 == "physical"){
+			var label_name = [];
+			switch(__CONFIG.stat_type){
+				case "11" : label_name=[["体检数据","item_score"]]; break;
+				case "12" : label_name=[["身高(cm)","item_score"]]; break;
+				case "13" : label_name=[["体重(kg)","item_score"]]; break;
+				case "14" : label_name=[["左","item_score"],["右","item_value"]]; break;
+				case "15" :case "16" : label_name=[["感染者数","item_score"]]; break;
+			}
+			result = [  ["姓名" , "item_name"]  ].concat(label_name)
+			if( __CONFIG.stat_type == "getPhysicalTestStat"){
+				result=[ ["单项指标","item_name"], ["기록","item_value"], ["单项分数" ,"item_score" ] , ["等级评定" , "level"] ];
+			}
+		}	
+		//미육라벨
+		else if(c1=="artmusic"){
+			//console.debug("tableLabelMake(c1, c2)" , c2);
+			var subjectname = (c2.subject == "51") ? "美术" : "音乐";
+			if(c2.method == "getArtMusic"){
+				var extendStr = [ [ subjectname+"문제카드(점)" ,"score"] ];
+				if(__CONFIG.stat_type == "12" || __CONFIG.stat_type == "22"){
+					extendStr = [ [ "提交率" , "score"] ];
+				};
+				result = [[ "班级","name"]].concat(extendStr);
+				if(__CONFIG.class_no != "00"){
+					result = [
+						[ "编号","student_no"],
+						[ "姓名","name"]
+					].concat(extendStr);	
+				}
+			}
+			//평
+			else if(c2.method == "getArtMusicEval"){
+				result = [
+					["编号","student_no"],
+					["姓名","name"],
+					["星分","feedback"],
+					["累计(次)","score"],
+				];
+				if(__CONFIG.class_no == "00"){
+					result[1] = ["班级","name"];
+					result.shift();
+				}
+			}
+			//제출율
+			else if(c2.method == "getMentalAttendance"){
+				result = [
+					["编号" , "student_no"],
+					["姓名" , "name"],
+					["课堂数(日)" , "study_day"],
+					["出席次数(日)" , "attendance_day"],
+					["出席率", "attendance_rate"]
+				];
+				if(__CONFIG.class_no == "00"){
+					result[1] = ["반","name"];
+					result.shift();
+				}
+			}
+		}
+		//지육 라벨 시작
+		else if(c1 == "attd"){
+			result = [
+				["编号", "student_no"], 
+				["姓名", "name"], 
+				["课堂数(日)", "study_day"], 
+				["出席次数(日)", "attendance_day"],
+				["出席率", "attendance_rate"]
+			];	
+		}else if(c2 == "2"){
+			result = [
+						["编号" , "student_no"],
+						["姓名" , "name"], 
+						["提交率" , "score"]
+					];
+		}else if(c2=="rank"){
+			result = [
+					[ "编号" , "student_no"],
+					[ "姓名" , "name"],
+					[ "班级排行", "class_no_rank"], 
+					[ "年级排行", "school_year_rank"]
+				];
+			if(__CONFIG.class_no == "00"){
+				result = [
+					[ "班级" , "class_no"],
+					[ "姓名" , "name"],
+					[ "年级排行", "school_year_rank"]
+				];
+			}
+		}else{
+			result = [
+						["编号" , "student_no"],
+						["姓名" , "name"], 
+						["评分" , "score"]
+					];
+		}
+
+		if(__CONFIG.mode == "learn" && __CONFIG.class_no == "00" && c2 !="rank"){
+				result.shift();
+		}
+		return result;
+	};//function tableLabelMake;
+
+	
+	/**
+	 * [settingDataExtendProperty description]
+	 * 데이터에 추가적으로 필요한 값을 세팅한다.
+	 * @return {[type]} [description]
+	 */
+	function settingDataExtendProperty(){
+		var nowStd = __THIS.__DOM.classListZone.find("[student]").val();
+		//학생모드일 경우
+		if(__CONFIG.target =="SS"){
+			nowStd = __USER_ID;
+		}
+		var data = __THIS.__DATA;
+		// 컬러설정
+		var spliceIdx;
+
+		var tmp = [];
+		data.data.forEach(function(obj, index){
+			if(obj.name == "全部" || obj.item_name == "全部"){
+				spliceIdx = index;
+				obj.seq = index;
+			}else{
+				
+				var idx = index;
+				if(spliceIdx != undefined){
+					idx = index-1;
+				}
+				obj.color = setChartColor(idx);
+				obj.seq = index;
+				obj.active = false;
+				if( obj.user_name && !obj.name) obj.name = obj.user_name;
+				//if( nowStd && nowStd == obj.user_id ) obj.active = true;
+			}
+
+			if( obj.user_id == nowStd){
+				tmp.push( obj );
+			}
+		});
+
+		if(spliceIdx != undefined){
+			__THIS.__DATA_AVRG = data.data.splice(spliceIdx,1);
+		}else{
+			__THIS.__DATA_AVRG = [];//undefined;
+		}
+
+		if( __THIS.__CONFIG.stat_type != "getPhysicalTestStat"){
+			data.data = tmp;
+		}
+		console.debug("settingDataExtendProperty" , __THIS.__DATA);
+	};
+	
+
+
+
+	__THIS.manager = {};
+	__THIS.manager.data = {};
+	__THIS.manager.data.Active = function(seq , chartActiveFlag){
+		var nowSeq = arrayObjectFindItem( __THIS.__DATA.data , "seq" , seq );
+		if(nowSeq.length > 0){
+			nowSeq[0].active = true;
+			__DOM.tableZone.find(".enabled-select-tr").each(function(){
+				if( $(this).data("seq") == seq ){
+					$(this).addClass("active");
+					if(chartActiveFlag){
+						try{
+							__THIS.chart.chartObject.get(seq).select(true);
+							if(__CONFIG.mode == "physical" && __CONFIG.stat_type == "14"){
+								__THIS.chart.chartObject.get("copy_"+seq).select(true, true);
+							}
+						}catch(e){}
+						//__THIS.chart.chartObject.get(seq).update({ color : nowSeq[0].color });	
+					}
+					
+				}else{
+					var disabledItem = $(this).data("seq");
+					//__THIS.chart.chartObject.get(disabledItem).update({ color : "gray" });
+					var item = arrayObjectFindItem( __THIS.__DATA.data , "seq" , disabledItem );
+					if(item.length > 0 ){
+						item[0].active = false;
+						$(this).removeClass("active");
+					}
+				}
+			})
+		};
+	};
+
+	__THIS.manager.data.unActive = function(seq, chartActiveFlag){
+		if(seq  != undefined ){
+			var nowSeq = arrayObjectFindItem( __THIS.__DATA.data , "seq" , seq );
+			if(nowSeq.length > 0){
+				nowSeq[0].active = false;
+				__DOM.tableZone.find(".enabled-select-tr").each(function(){
+					if( $(this).data("seq") == seq ){
+						$(this).removeClass("active");
+						if(chartActiveFlag){
+							try{
+								__THIS.chart.chartObject.get(seq).select(false, false);	
+							}catch(e){}
+						}
+					}
+				});
+			}
+		}else{
+			__THIS.__DATA.data.forEach(function(d){
+				d.active = false;
+			});
+			__DOM.tableZone.find(".enabled-select-tr.active").removeClass("active");
+		}
+		
+	};
+
+	__THIS.init = initialize;
+})(_a, window);
+
+
+
+
+/**
+ * 테이블 만들기
+ * @param  {[type]} __THIS [description]
+ * @return {[type]}        [description]
+ */
+(function(__THIS){
+	__THIS.table = {};
+	var o = __THIS.table;
+	o.init = function(label){
+		var data = __THIS.__DATA;
+		if(label) o.label = label;
+		var tableHtml = $( o.makeHtml(o.label) );
+		tableHtml.find("[cts-table-sort]").unbind(__EVENT_TYPE).on(__EVENT_TYPE , function(e){
+			e.preventDefault();
+			var orderby = $(this).attr("cts-table-sort");
+			orderby = (orderby == "down") ? "up" : "down";
+			$(this).attr("cts-table-sort" , orderby).siblings(":not(.cts-content-table-no)").attr("cts-table-sort" , "init");
+			var key = tableHtml.find("tbody tr:eq(0) td").eq( $(this).index() ).attr("orderkey");
+			__THIS.__DATA.data = sortData( __THIS.__DATA.data , key , orderby);
+			if(__THIS.__DATA.detailMap){
+				var target = __THIS.__DOM.chartIconArea.find("[spider-chart-diff-data] option:selected").data("dataList");
+				__THIS.__DATA.detailMap = sortData( target , key , orderby);
+			};
+			o.refresh(o.label);
+		});
+		//console.debug("tableHtml" , tableHtml);
+		return tableHtml;
+	};
+
+	o.refresh = function( label ){
+		__THIS.chart.makeChart();
+		//var options = $.extend({}, Default_options, __THIS.chart.setSeries.init( __THIS.chart.nowChartType ) );
+		//__THIS.chart.chartObject.init(options);
+		var tableHtml = $(o.init( o.label) ).find("tbody[reallydata]");
+		__THIS.__DOM.tableZone.find("tbody[reallydata]").replaceWith(tableHtml);
+		
+	}
+
+	o.makeHtml = function(label){
+		//console.debug("makeTableHtml" , label);
+		if(!label) label = o.label;
+		var data = __THIS.__DATA;
+		var theadCnt = 1;
+		var html = "";
+		var extendClass="";
+		if(__THIS.__CONFIG.stat_type == "getPhysicalTestStat" && __THIS.__DATA.total){
+			if(__THIS.__DATA.total.length>0){
+				extendClass = "getPhysicalTestStatTable";
+				var total = __THIS.__DATA.total[0];
+				html +="<div class='getPhysicalTestStatHeader'>";
+				html +="<table><tr>";
+				//html +="<td width=30></td>";
+				html +="<td>年级平均</td><td>"+total.item_score+"</td><td>"+total.level+"</td>";
+				html +="</tr></table>";
+				html += "</div>"
+			}else{
+				theadCnt = 0;
+			}
+		}
+		html += "<table class='cts-content-table "+extendClass+"'>";
+		html += "<thead>";
+		if( __THIS.__CONFIG.stat_type != "getPhysicalTestStat") html += "<th class='cts-content-table-no'>&nbsp;</th>";
+		label.forEach(function(th){
+			html += "<th cts-table-sort='init'>"+th[0]+"</th>";
+			theadCnt++;
+		})
+		html += "</thead>";
+		html += "<tbody reallydata>";
+		if(data.data.length ==0){
+			html += "<tr>"
+			html += "<td colspan="+theadCnt+">没有数据。</td>";
+			html += "</tr>"
+		}
+		html += "</tbody>";
+		html += "</table>";
+		//단항지표 가산점 추가
+
+		
+		html = $(html);
+
+		//전체 평균 내기
+		if(__THIS.__DATA_AVRG.length > 0){
+			var tdArray = {};
+			var avrgData = __THIS.__DATA_AVRG[0]
+			//console.warn("평균을 만들어 내겠습니다. averData : " , avrgData)
+			var itemTr = $("<tr class='ct-data-summary-tr'></tr>").data("seq" , avrgData.seq);
+			itemTr.append("<td> <span class='cts-color-label' style='background:red;'></span> </td>");
+			for(var key in avrgData){
+					var td = "";
+					td += "<td orderkey="+key+">";
+					if(key == "feedback"){
+						td += makeRating(avrgData[key]);
+					}else if( __THIS.__CONFIG.mode =="physical" && key =="item_name"){
+						var averDataName = "全部";
+						switch(avrgData.item_name){
+							case "11" : averDataName = "学校-全部"; break;
+							case "12" : averDataName = "学校-男"; break;
+							case "13" : averDataName = "学校-女"; break;
+							case "21" : averDataName = "年级-全部"; break;
+							case "22" : averDataName = "年级-男"; break;
+							case "23" : averDataName = "年级-女"; break;
+							case "31" : averDataName = "班级-全部"; break;
+							case "32" : averDataName = "班级-男"; break;
+							case "33" : averDataName = "班级-女"; break;
+						}
+						td += averDataName
+					}else if(key != "student_no"){
+						td += avrgData[key];
+						td += extendStr(key);
+					}else{
+						td += "-";
+					}
+					td += "</td>";
+					td = $(td);
+					tdArray[key] = td;
+			};
+			label.forEach(function(key){
+				itemTr.append(tdArray[key[1]]);
+			});
+			html.find("tbody[reallydata]").append(itemTr);
+		};
+
+		data.data.forEach(function(rows,index){
+			var itemTr = $("<tr class='enabled-select-tr'></tr>").data("seq" , rows.seq);;
+			if( __THIS.__CONFIG.stat_type != "getPhysicalTestStat")  itemTr.append("<td> <span class='cts-color-label' style='background:"+rows.color+";'></span> </td>");
+			var tdArray = {}
+			for(var key in rows){
+				var td = "";
+				td += "<td orderkey="+key+">";
+				if(key == "feedback"){
+					td += makeRating(rows[key]);
+				}else {
+					td += rows[key];
+				}
+				td += extendStr(key);
+				td += "</td>";
+				td = $(td);
+				tdArray[key] = td;
+			};
+			label.forEach(function(key){
+				itemTr.append(tdArray[key[1]]);
+			});
+			//데이터 정렬
+			//var td_stduent_no = itemTr.find("[orderkey='student_no']");
+			//td_stduent_no.insertBefore(itemTr.find("[orderkey='name']"));
+
+			//데이터 정렬
+			itemTr.on(__EVENT_TYPE , function(e){
+				var nowSeq = $(this).data("seq");
+				if( !$(this).hasClass("active") ){
+					__THIS.manager.data.Active( nowSeq , true);
+				}else{
+					__THIS.manager.data.unActive( nowSeq , true);
+				}
+			});
+			if(rows.active == true){
+				itemTr.addClass("active");
+			}
+			html.find("tbody[reallydata]").append(itemTr);
+		});
+
+		if(__THIS.__CONFIG.stat_type == "getPhysicalTestStat" && data.detail.length > 0){
+			//alert('d')
+			var appendTable = "";
+			appendTable += "<table class='cts-content-table "+extendClass+"'>";
+			appendTable += "<thead><th>单项指标(+加分)</th><th>超过记录</th><th>加分分数</th></thead><tbody>";
+			data.detail.forEach(function(d){
+				appendTable += "<tr>"
+				appendTable += "<td>"+d.item_name+"</td>";
+				appendTable += "<td>"+d.item_score+"</td>";
+				appendTable += "<td>"+d.item_value+"</td>";
+				appendTable += "</tr>";
+			});
+			appendTable += "</tbody></table>";
+			appendTable = $(appendTable);
+			html.push( appendTable.eq(0)[0] );	
+		};
+		return html;
+	};
+
+	function checkTableLabel(key){
+		var result = false;
+		var ignoreKey = ["color" , "seq" , "active" , "user_id","feedback","class_no","user_name"];
+		var config = __THIS.__CONFIG;
+		if(config.mode == "learn"){
+			if( config.class_no == "00"){
+				ignoreKey.push("student_no");
+			}
+		}else{
+			
+		}
+		if( 0 > ignoreKey.indexOf(key)) result = true;
+		return result;
+	};
+
+	function extendStr(keyName){
+		var str="";
+		switch(keyName){
+			case "percent":
+			case "attendance_rate":
+			str="%";
+			break;
+		}
+		return str;
+	}
+
+	function makeGrade(score){
+		var result = "";
+		switch( parseInt( (score / 10).toFixed(0) ) ){
+			case 10 :
+			case 9 :
+				result = "优秀";
+				break
+			case 8 :
+				result = "良好";
+				break;
+			case 7 : 
+			case 6 :
+				result = "及格";
+				break;
+			default :
+				result = "不及格";
+				break; 
+		}
+		return result;
+	}
+	function makeRating(ratingCnt){
+		var ratingPer = parseFloat(ratingCnt)/5.0*100;
+		//console.info("rating" , ratingCnt , "  ->  " , ratingPer)
+		var html ='';
+		html+='<div class="star-ratings-css">';
+		html+='  <div class="star-ratings-css-top" style="width: '+ratingPer+'%"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>';
+		html+='  <div class="star-ratings-css-bottom"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>';
+		html+='</div>';
+		return html;
+	}
+})(_a);
+
+
+
+/**
+ * [description]
+ * @param  {[type]} __THIS [description]
+ * @return {[type]}        [description]
+ */
+(function(__THIS){
+	__THIS.chart = {};
+	var o = __THIS.chart;
+	o.chartObject = {};
+	o.nowChartType = "pie";
+	var __CONFIG;
+	var __DATA = null;
+	var __CHART_TYPE = "pie";
+	Highcharts.setOptions().colors = [
+		"#f25e5a",
+		"#1db57a",
+		"#988fc6",
+		"#8e8e8e",
+		"#3889ca",
+		"#a968ac",
+		"#f3773b",
+		"#63c8d0",
+		"#df4930",
+		"#6a62ad",
+		"#a7d1ea",
+		"#fac112",
+		"#1ba0bf",
+		"#ec5e84",
+		"#f298be",
+		"#74ccf2",
+		"#eb8c4c",
+		"#5c6262",
+		"#aec2db",
+		"#cdcf62",
+		"#abb530",
+		"#6e489b",
+		"#67d1df",
+		"#a3000e",
+		"#b19570",
+		"#f2778c",
+		"#3ac7d0",
+		"#6a61b0",
+		"#ee6c5f",
+		"#a2b639",
+		"#7e431b",
+	];
+
+	var Default_options = {
+		chart : {
+			spacingTop: 20,
+			reflow: true
+		},
+		scrollbar : {
+			enbaled : true,
+			barBackgroundColor: 'gray',
+			barBorderRadius: 7,
+			barBorderWidth: 0,
+			buttonBackgroundColor: 'gray',
+			buttonBorderWidth: 0,
+			buttonBorderRadius: 7,
+			trackBackgroundColor: 'none',
+			trackBorderWidth: 1,
+			trackBorderRadius: 8,
+			trackBorderColor: '#CCC'
+		},
+		// navigator:{
+		// 	enabled:false
+		// },
+		// rangeSelector: {
+		// 	enabled: false
+		// },
+		legend: {
+			enabled : false,
+		},
+		title : {
+			text : "",
+			align : "",
+			userHTML : false
+		},
+		subtitle : {
+			text : "",
+		},
+		yAxis : {
+			title : "",
+		},
+		plotOptions: {
+			series: {
+				allowPointSelect: true,
+				animation: false,
+				marker : {
+					symbol : "circle"
+				},
+				cursor : "pointer",
+				//selected : true,
+				point : {
+					events : {
+						click : function(evt){
+							//console.log("evt" , evt.currentTarget);
+						},
+						select : function(evt){
+							if(evt.currentTarget.id != undefined){
+								__THIS.manager.data.Active( evt.currentTarget.id, true);
+	 							evt.currentTarget.setState('hover');
+        							__THIS.chart.chartObject.tooltip.refresh( evt.currentTarget );
+							}
+						},
+						unselect : function(evt){
+							if(evt.currentTarget.id != undefined){
+								__THIS.manager.data.unActive(evt.currentTarget.id);	
+								evt.currentTarget.setState();
+								__THIS.chart.chartObject.tooltip.hide();
+								//evt.currentTarget.update({ color: "red"})
+							}
+						},
+						mouseOut : function(evt){
+							var item = arrayObjectFindItem( __THIS.__DATA.data , "active" , true );
+							if(item.length > 0 && item[0].active == true){
+								__THIS.chart.chartObject.get(item[0].seq).setState('hover');
+								__THIS.chart.chartObject.tooltip.refresh( evt.currentTarget );
+							}
+						}
+					},
+				},
+				states : {
+					select : {
+						//color : "gray",
+						fillColor : "red",
+						borderColor : "black",
+						lineWidth : 2,
+						shadow: true,
+					},
+				}
+			},
+			column : {
+				selected : true,
+				states : {
+					select : {
+						fillColor : "red",
+						borderColor : "black",
+						lineWidth : 2,
+						shadow: true,
+					},
+					hover : {
+						opacity : .5
+					}
+				}
+			},
+			pie : {
+				size : 350,
+				slicedOffset: 30
+			},
+			line : {
+				tooltip : {
+					shared: true,
+				}
+			}
+		},
+		exporting : {
+			buttons : {
+				contextButton : {
+					enabled : false,
+				},
+			}
+		},
+		tooltip : {
+			headerFormat : "<strong style='font-size:15px;'>{point.key}</strong><br/>",
+			pointFormat: "<strong>{point.y}</strong>",//<br/>비율 : <strong>{point.percentage} %</strong>'
+		},
+		credits : {
+			enabled : false	
+		},
+		lang: {
+            noData: "没有数据。"
+		},
+		noData: {
+        		position : { "x" : 0 , "y" : 0},
+            	style: {
+				fontWeight: 'bold',
+				fontSize: '15px',
+				color: '#303030'
+			}
+        	},
+		series: []
+	}
+	o.init =function( default_type ){
+		__CONFIG = __THIS.__CONFIG;
+		o.makeChart( default_type || "column" );
+	};
+
+	o.makeChart = function(type){
+		console.debug("window" , window.event)
+		//window.event.preventDefault();
+		if(!type) type = o.nowChartType;
+		o.nowChartType = type;
+		o.setButton(type);
+		var options = $.extend({}, Default_options, o.setSeries.init(type) );
+		console.log("options" , options);
+		o.chartObject = __THIS.__DOM.chartZone.highcharts(options).highcharts();
+		//o.chartObject = new Highcharts.Chart("cts-content-chart-area" , options);
+		// if(o.chartObject.series){
+		// 	//o.chartObject.init(options);
+		// 	console.warn("이미 차트가 잇습니다.")
+		// }else{
+		// 	o.chartObject = __THIS.__DOM.chartZone.highcharts(options).highcharts();
+		// }
+
+		if((__THIS.__DATA.data || []).length ==0){
+			o.chartObject.showLoading("没有数据。");
+		};
+	};
+
+	o.setButton = function(type){
+		__THIS.__DOM.buttonArea.find("[cts-chart-build="+type+"]").addClass("on").siblings().removeClass("on")
+	};
+
+	o.setSeries={}
+	o.setSeries.init = function(type){
+		var result = o.setSeries[type]();
+		return result;
+	};
+
+
+	o.setSeries.pie = function(){
+		var seriesData = __THIS.__DATA.data || [];
+		if(seriesData.length == 0){
+			return;
+		}
+		var extendOptions = {};
+		var result = {};
+		//item.name = "test";
+		result.animation = false;
+		result.name = __CONFIG.label;
+		result.type = "pie";
+		result.cursor = "point";
+		//item.color = COLOR.;
+		result.data = [];
+		result.dataLabels = {
+			enabled: true,
+			color: "white",
+			format : "<b>{point.name}</b><br/>{point.y} 명<br/>{point.percentage: .1f}%",
+			color: "black",
+			style : {
+				fontSize: "1em"
+			}
+		}
+		seriesData.forEach(function(d, idx){
+			result.data.push({ 
+				id : d.seq,
+				name : d.name , 
+				y : d.count ,
+				color : d.color,
+				sliced : d.active,
+				selected : d.active,
+			});
+		});
+		//extendOptions.plotOptions = { pie : { size : 350 } };
+		extendOptions.series = [result];
+		return extendOptions;
+	}
+
+
+	o.setSeries.bar = function(){
+		var seriesData = __THIS.__DATA.data || [];
+		if(seriesData.length == 0){
+			return;
+		}
+		var extendOptions = {};
+		//extendOptions.series = [];
+		//extendOptions.chart = { type : "column" }
+		extendOptions.xAxis = { categories : []  }
+		extendOptions.series = [{
+			type : "column",
+			cursor : "point",
+			data : [],
+		}];
+		var averData = __THIS.__DATA_AVRG;
+		if(__CONFIG.mode == "physical" && __CONFIG.stat_type == "14"){
+			extendOptions.series[1] = {
+				type : "column",
+				cursor : "point",
+				data : [],
+			}
+			seriesData.forEach(function(d, idx){
+				var set = {
+					id : d.seq,
+					y : d.item_value,
+					name : d.name || d.item_name,
+					color : d.color,
+					selected : d.active,
+				};
+				var set_2 ={
+					id : "copy_"+d.seq,
+					y : d.item_score,
+					name : d.name || d.item_name,
+					color : d.color,
+					selected : d.active,
+				};
+				extendOptions.series[0].data.push( set );
+				extendOptions.series[1].data.push( set_2 );
+				extendOptions.xAxis.categories.push( d.name || d.item_name );
+			});
+		}else{
+			seriesData.forEach(function(d, idx){
+				var value = d.count || d.attendance_rate || d.score || d.item_score;
+				var set = {
+					id : d.seq,
+					y : value,
+					name : d.name || d.item_name,
+					color : d.color,
+					selected : d.active,
+				};
+				extendOptions.series[0].data.push( set );
+				extendOptions.xAxis.categories.push( d.name || d.item_name );
+				console.debug("=========>" , d.color);
+			});
+
+		}
+		
+		if( averData.length >0){
+			//console.warn("averData" , averData);
+			var averDataName = "平均";
+			switch(averData[0].item_name){
+				case "11" : averDataName = "学校-全部"; break;
+				case "12" : averDataName = "学校-男"; break;
+				case "13" : averDataName = "学校-女"; break;
+				case "21" : averDataName = "年级-全部"; break;
+				case "22" : averDataName = "年级-男"; break;
+				case "23" : averDataName = "年级-女"; break;
+				case "31" : averDataName = "班级-全部"; break;
+				case "32" : averDataName = "班级-男"; break;
+				case "33" : averDataName = "班级-女"; break;
+
+			}
+			var averDataInt = averData[0].attendance_rate || averData[0].score || averData[0].item_score
+			var extendaverData = {
+				id : averData[0].seq,
+				name : averDataName,
+				type : "scatter",
+				marker : { enabled : false},
+				data : [ averDataInt ]
+			};
+			extendOptions.yAxis = { 
+				title : "",
+				plotLines:[{
+					value: averDataInt ,
+					color: '#ff0000',
+					width: 1,
+					zIndex: 4,
+					label:{
+						y : -6,
+						text: averDataName+' ('+averDataInt+')' ,
+						style : {
+							//textShadow : "2px 2px 0px white,2px -2px 0px white,-2px 2px 0px white,-2px -2px 0px white",
+							fontWeight : "bold",
+						},
+					}
+               	}]
+               }
+			extendOptions.series.push(extendaverData);
+		}
+		//console.debug("extendOptions.series" , extendOptions.series);
+		
+		if(extendOptions.series[0].data.length > 10){
+			extendOptions.scrollbar = { enabled: true };
+			extendOptions.xAxis.min = 1;
+			extendOptions.xAxis.max = 5;
+		};
+		if(!extendOptions.yAxis) extendOptions.yAxis ={};
+		extendOptions.yAxis.title= "";
+		extendOptions.yAxis.min = 0;
+		//지육통계
+		if(
+			__THIS.__CONFIG.mode == "learn" || 
+			(
+				__THIS.__CONFIG.mode == "artmusic" && 
+				( __THIS.__CONFIG.stat_type == "51" || __THIS.__CONFIG.stat_type == "12" || __THIS.__CONFIG.stat_type == "52" || __THIS.__CONFIG.stat_type == "22")
+			) 
+
+		){
+			extendOptions.yAxis.max = 100;	
+		}
+		//미육 - 평점 10점
+		else if(__THIS.__CONFIG.mode == "artmusic" && ( __THIS.__CONFIG.stat_type == "11" || __THIS.__CONFIG.stat_type == "21") ){
+			extendOptions.yAxis.max = 10;
+		}
+		//체육 - 시력 +2, -2
+		else if(__THIS.__CONFIG.mode == "physical" && __THIS.__CONFIG.stat_type == "14"){
+			extendOptions.yAxis.min = -2;
+			extendOptions.yAxis.max = 2;
+		}
+		//console.debug("extendOptions" , extendOptions)
+		return extendOptions;
+	};
+
+
+	o.setSeries.line = function(){
+		var seriesData = __THIS.__DATA.data || [];
+		if(seriesData.length == 0){
+			return;
+		}
+		var extendOptions = {};
+		var result = {};
+		extendOptions.xAxis = { categories : []  }
+		result.name = __CONFIG.label;
+		result.type = "line";
+		result.cursor = "point";
+		
+		//item.color = COLOR.;
+		result.data = [];
+		result.dataLabels = {
+			color: "white",
+			distance : -50,
+			style : {
+				fontSize: "90%"
+			}
+		}
+		seriesData.forEach(function(d, idx){
+			var value = d.count || d.attendance_rate || d.score || d.item_score;
+			var items = {
+				id : d.seq,
+				name : d.name || d.item_name,
+				y : value,
+				color : d.color
+			};
+			if(!items.y) items.y = 0;
+			result.data.push(items);
+			extendOptions.xAxis.categories.push( d.name || d.item_name );
+		});
+		extendOptions.series = [result];
+
+		
+		if(extendOptions.series[0].data.length > 11){
+			extendOptions.scrollbar = { enabled: true };
+			extendOptions.xAxis.min = 1;
+			extendOptions.xAxis.max = 10;
+		};
+
+		var averData = __THIS.__DATA_AVRG;
+		if( averData.length >0){
+			var averDataName = "平均";
+			switch(averData[0].item_name){
+				case "11" : averDataName = "学校-全部"; break;
+				case "12" : averDataName = "学校-男"; break;
+				case "13" : averDataName = "学校-女"; break;
+				case "21" : averDataName = "年级-全部"; break;
+				case "22" : averDataName = "年级-男"; break;
+				case "23" : averDataName = "年级-女"; break;
+				case "31" : averDataName = "班级-全部"; break;
+				case "32" : averDataName = "班级-男"; break;
+				case "33" : averDataName = "班级-女"; break;
+			}
+			var averDataInt = averData[0].attendance_rate || averData[0].score || averData[0].item_score
+			var extendaverData = {
+				id : averData[0].seq,
+				name : averDataName,
+				type : "scatter",
+				marker : { enabled : false},
+				data : [ averDataInt ]
+			};
+			extendOptions.yAxis = { 
+				title : "",
+				plotLines:[{
+					value: averDataInt ,
+					color: '#ff0000',
+					width: 1,
+					zIndex: 4,
+					label:{
+						y : -6,
+						text: averDataName+' ('+averDataInt+')' ,
+						style : {
+							//textShadow : "2px 2px 0px white,2px -2px 0px white,-2px 2px 0px white,-2px -2px 0px white",
+							fontWeight : "bold",
+						},
+					}
+               	}]
+            }
+            extendOptions.yAxis.min = 0
+			if( __THIS.__CONFIG.mode == "learn"){
+				extendOptions.yAxis.max = 100;
+			}
+			extendOptions.series.push(extendaverData);
+			console.debug("extendOptions.series " , extendOptions);
+		}//평균선
+
+		//y축 max계산
+		//지육통계
+		if(
+			__THIS.__CONFIG.mode == "learn" || 
+			(
+				__THIS.__CONFIG.mode == "artmusic" && 
+				( __THIS.__CONFIG.stat_type == "51" || __THIS.__CONFIG.stat_type == "12" || __THIS.__CONFIG.stat_type == "52" || __THIS.__CONFIG.stat_type == "22")
+			)
+		){
+			extendOptions.yAxis.max = 100;	
+		}
+		//미육 - 평점 10점
+		else if(__THIS.__CONFIG.mode == "artmusic" && ( __THIS.__CONFIG.stat_type == "11" || __THIS.__CONFIG.stat_type == "21") ){
+			extendOptions.yAxis.max = 10;
+		}
+		//체육 - 시력 +2, -2
+		else if(__THIS.__CONFIG.mode == "physical" && __THIS.__CONFIG.stat_type == "14"){
+			extendOptions.yAxis.min = -2;
+			extendOptions.yAxis.max = 2;
+		}
+		return extendOptions;
+	}
+
+
+	o.setSeries.spider = function(){
+		var seriesData = __THIS.__DATA.data || [];
+		var seriesExtendData = __THIS.__DATA.detail || [];
+		if(seriesData.length == 0){
+			return;
+		}
+		var extendOptions = {};
+
+		extendOptions.xAxis = {
+            categories: [],
+            tickmarkPlacement: 'on',
+            lineWidth: 0
+        }
+
+        extendOptions.yAxis = {
+            gridLineInterpolation: 'polygon',
+            lineWidth: 0,
+            min: 0,
+            max : 150,
+        }
+		extendOptions.chart = {
+			polar : true,
+			type : "line"
+		}
+		var result = {};
+		result.data = [];
+		result.color = Highcharts.getOptions().colors[0],
+		seriesData.forEach(function(d, idx){
+			extendOptions.xAxis.categories[idx] = d.item_name;
+			result.data.push({
+				id : d.seq,
+				name : d.item_name ,
+				y : d.item_score,
+			});
+		});
+		
+		extendOptions.series = [result , settingSpiderDataExtendProperty()];
+		//console.debug("extendOptions" , extendOptions)
+		return extendOptions;
+	};
+
+	function settingSpiderDataExtendProperty(){
+		var target = __THIS.__DOM.chartIconArea.find("[spider-chart-diff-data] option:selected").data();
+		var result = {
+			name : target.name || target.item_name,
+			id : target.name,
+			color :Highcharts.getOptions().colors[1],
+			data : []
+		};
+		target.dataList.forEach(function(item){
+			result.data.push({
+				name : item.item_name,
+				y : item.item_score,
+			});
+		});
+		//console.debug("settingSpiderDataExtendProperty" , target)
+		return result;
+	}
+})(_a);
+
+
+// 학년별 과목 담고 있는 obj
+var cts_report_subjectObj = {
+	'01' : [
+		
+	],
+	'02' : [
+		
+	],
+	'03' : [
+		
+	],
+	'04' : [
+		
+	],
+	'05' : [
+		
+	],
+	'06' : [
+		
+	],
+	'07' : [
+		
+	],
+	'08' : [
+		
+	],
+	'09' : [
+		
+	],
+}
+// 학년
+var year_array = ["01","02","03","04","05","06","07","08","09"];
+
+// 학년별 과목 세팅
+function setcts_report_subjectObj(callback){
+	var apiUrlSubject = cts.Chart.requestURL.getSchoolYearSubjectList;
+	var reqData = {
+		school_year : "",
+		subject : ""
+	};
+
+	// 1학년
+	reqData.school_year = year_array[0];
+	getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+		if(data.resultcode == "0000"){
+			cts_report_subjectObj[year_array[0]] = data.result.data;
+			
+			// 2학년
+			reqData.school_year = year_array[1];
+			getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+				if(data.resultcode == "0000"){
+					cts_report_subjectObj[year_array[1]] = data.result.data;
+					
+					// 3학년
+					reqData.school_year = year_array[2];
+					getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+						if(data.resultcode == "0000"){
+							cts_report_subjectObj[year_array[2]] = data.result.data;
+
+							// 4학년
+							reqData.school_year = year_array[3];
+							getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+								if(data.resultcode == "0000"){
+									cts_report_subjectObj[year_array[3]] = data.result.data;
+
+									// 5학년
+									reqData.school_year = year_array[4];
+									getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+										if(data.resultcode == "0000"){
+											cts_report_subjectObj[year_array[4]] = data.result.data;
+
+											// 6학년
+											reqData.school_year = year_array[5];
+											getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+												if(data.resultcode == "0000"){
+													cts_report_subjectObj[year_array[5]] = data.result.data;
+
+													// 7학년
+													reqData.school_year = year_array[6];
+													getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+														if(data.resultcode == "0000"){
+															cts_report_subjectObj[year_array[6]] = data.result.data;
+
+															// 8학년
+															reqData.school_year = year_array[7];
+															getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+																if(data.resultcode == "0000"){
+																	cts_report_subjectObj[year_array[7]] = data.result.data;
+
+																	// 9학년
+																	reqData.school_year = year_array[8];
+																	getAjaxPostData(apiUrlSubject, reqData, false, function(data){
+																		if(data.resultcode == "0000"){
+																			cts_report_subjectObj[year_array[8]] = data.result.data;
+
+																			if(callback && typeof callback=="function") callback();
+																		}else{
+																			console.log('9학년별과목 세팅오류');
+																		}
+																	});
+																}else{
+																	console.log('8학년별과목 세팅오류');
+																}
+															});
+														}else{
+															console.log('7학년별과목 세팅오류');
+														}
+													});
+												}else{
+													console.log('6학년별과목 세팅오류');
+												}
+											});
+										}else{
+											console.log('5학년별과목 세팅오류');
+										}
+									});
+								}else{
+									console.log('4학년별과목 세팅오류');
+								}
+							});
+						}else{
+							console.log('3학년별과목 세팅오류');
+						}
+					});
+				}else{
+					console.log('2학년별과목 세팅오류');
+				}
+			});
+		}else{
+			console.log('1학년별과목 세팅오류');
+		}
+	});
+
+
+	// ajax post
+	function getAjaxPostData(url, paramData, flag ,callback){
+		var result;
+		$.ajax({
+			timeout: (1000*60),
+			type: "POST",
+			url: url,
+			dataType: "json",
+			global : false,
+			cache: false,
+			async: true,
+			data: paramData,
+			success: function(jsonData){
+				//console.log('success');
+				//debug_tip(); //한글 변환
+				result = jsonData;
+				callback(result);
+			},
+			error:function (xhr, ajaxOptions, thrownError){
+				result = { result: "9999"};
+				callback(result);
+			},
+			complete: function() {
+			}
+		});
+	}
+}
+
+
+

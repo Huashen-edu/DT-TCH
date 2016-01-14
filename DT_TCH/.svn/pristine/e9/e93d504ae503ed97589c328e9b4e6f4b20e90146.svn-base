@@ -1,0 +1,420 @@
+	
+	
+	
+	momsSubTempFrame.statistic = {};
+	momsSubTempFrame.statistic.wrapper = momsSubTempFrame.wrapper.find('.statistic');
+
+	momsSubTempFrame.statistic.pname = momsSubTempFrame.wrapper.find('.tabs_dep2.on').attr("data-pname");
+
+	// init
+	momsSubTempFrame.statistic.init = function(){
+		$('#chartLayer1').addClass('sizeAuto');
+
+		if(momsSubTempFrame.statistic.pname == '05'){
+			momsSubTempFrame.wrapper.find('#main_fail_alert .desc').html('正在准备中。'); //준비중입니다.
+			momsSubTempFrame.wrapper.find('#main_fail_alert').fadeIn();
+			return false;
+		}else{
+			momsSubTempFrame.statistic.makeSelect();		//셀렉트 메이크
+			momsSubTempFrame.statistic.eventBind();			//이벤트 바인드
+		}
+	}
+
+
+
+	// 지육통계 select
+	var select_jiyuk = [
+		// 초등 과목
+		[
+            '<select class="control form-control"> ' +
+			'<option value="1" data-kor="수학">数学</option> ' +
+			'<option value="1" data-kor="어문">语文</option> ' +
+			'<option value="1" data-kor="취미과학">趣味科学</option> ' +
+			'<option value="1" data-kor="과학">科学</option> ' +
+			'<option value="1" data-kor="영어">英语</option> ' +
+			'<option value="1" data-kor="품덕과사회">品德与社会</option> ' +
+			'<option value="1" data-kor="생물">生物</option> ' +
+			'<option value="1" data-kor="지리">地理</option> ' +
+			'<option value="1" data-kor="정치">政治</option> ' +
+			'<option value="1" data-kor="역사">历史</option> ' +
+			'<option value="1" data-kor="품덕과생활">品德与生活</option> ' +
+			'<option value="1" data-kor="물리">物理</option> ' +
+			'<option value="1" data-kor="화학">化学</option> ' +
+			'<option value="1" data-kor="미술">美术</option> ' +
+			'<option value="1" data-kor="음악">音乐</option> ' +
+			'<option value="1" data-kor="체육활동">体育活动</option> ' +
+			'<option value="1" data-kor="체육">体育</option> ' +
+            '</select>'
+        ],
+		// 중등 과목
+		[
+            '<select class="control form-control"> ' +
+			'<option value="1" data-kor="수학">数学</option> ' +
+			'<option value="1" data-kor="어문">语文</option> ' +
+			'<option value="1" data-kor="취미과학">趣味科学</option> ' +
+			'<option value="1" data-kor="과학">科学</option> ' +
+			'<option value="1" data-kor="영어">英语</option> ' +
+			'<option value="1" data-kor="품덕과사회">品德与社会</option> ' +
+			'<option value="1" data-kor="생물">生物</option> ' +
+			'<option value="1" data-kor="지리">地理</option> ' +
+			'<option value="1" data-kor="정치">政治</option> ' +
+			'<option value="1" data-kor="역사">历史</option> ' +
+			'<option value="1" data-kor="품덕과생활">品德与生活</option> ' +
+			'<option value="1" data-kor="물리">物理</option> ' +
+			'<option value="1" data-kor="화학">化学</option> ' +
+			'<option value="1" data-kor="미술">美术</option> ' +
+			'<option value="1" data-kor="음악">音乐</option> ' +
+			'<option value="1" data-kor="체육활동">体育活动</option> ' +
+			'<option value="1" data-kor="체육">体育</option> ' +
+            '</select>'
+        ],
+		// 지육 최하위 분류
+		[
+            '<select class="control form-control"> ' +
+			'<option value="1" data-kor="학생출석율">学生出席率</option> ' +
+			'<option value="2" data-kor="수업중테스트">课堂练习</option> ' +
+			'<option value="3" data-kor="예습">预习</option> ' +
+			'<option value="4" data-kor="과제">作业</option> ' +
+			'<option value="5" data-kor="복습">复习</option> ' +
+			'<option value="6" data-kor="모의고사">模拟考试</option> ' +
+			'<option value="7" data-kor="문제카드 (학생별)">题卡（按学生）</option> ' +
+            '</select>'
+        ]
+    ];
+
+
+	// 미육통계 select
+	var select_miyuk = [
+		// 초등 과목
+		[
+            '<select class="control form-control" id="miyuk_subject"> ' +
+			'<option value="1" data-kor="미술">美术</option> ' +
+			'<option value="2" data-kor="음악">音乐</option> ' +
+            '</select>'
+        ],
+		// 중등 과목
+		[
+            '<select class="control form-control" id="miyuk_subject"> ' +
+			'<option value="1" data-kor="미술">美术</option> ' +
+			'<option value="2" data-kor="음악">音乐</option> ' +
+            '</select>'
+        ],
+		// 미육 최하위 분류 - 미술
+		[
+            '<select class="control form-control"> ' +
+			'<option value="1" data-kor="미술문제카드">美术题卡</option> ' +
+			'<option value="2" data-kor="미술평가">美术评价</option> ' +
+			'<option value="3" data-kor="미술출석율">出勤率</option> ' +
+			'<option value="4" data-kor="미술과제제출율">作业提交率</option> ' +
+            '</select>'
+        ],
+		// 미육 최하위 분류 - 음악
+		[
+            '<select class="control form-control"> ' +
+			'<option value="1" data-kor="음악문제카드">音乐题卡</option> ' +
+			'<option value="2" data-kor="음악평가">音乐评价</option> ' +
+			'<option value="3" data-kor="음악출석율">出勤率</option> ' +
+			'<option value="4" data-kor="음악과제제출율">作业提交率</option> ' +
+            '</select>'
+        ]
+    ];
+
+
+	// 체육통계 select
+	var select_physic = [
+		// 초등 과목
+		[
+            '<select class="control form-control" id="physic_subject"> ' +
+			'<option value="1" data-kor="체육각항테스트점수">体育测试</option> ' +
+			'<option value="2" data-kor="체질관리">体检数据</option> ' +
+            '</select>'
+        ],
+		// 중등 과목
+		[
+            '<select class="control form-control" id="physic_subject"> ' +
+			'<option value="1" data-kor="체육각항테스트점수">体育测试</option> ' +
+			'<option value="2" data-kor="체질관리">体检数据</option> ' +
+            '</select>'
+        ],
+		// 체육통계 최하위 분류
+		[
+            '<select class="control form-control"> ' +
+			'<option value="1" data-kor="신검수치">体检数据</option> ' +
+			'<option value="2" data-kor="키">身高</option> ' +
+			'<option value="3" data-kor="체중">体重</option> ' +
+			'<option value="4" data-kor="시력">视力</option> ' +
+            '</select>'
+        ]
+    ];
+
+
+	// 셀렉트 메이크
+	momsSubTempFrame.statistic.makeSelect = function(){
+		var html = '';
+
+        html = momsSubTempFrame.statistic.makeTypeSelect(momsSubTempFrame.statistic.pname);
+
+        momsSubTempFrame.statistic.wrapper.find('#selectLayer').html(html);
+	}
+
+
+	// 분류에 따른 셀렉트
+	momsSubTempFrame.statistic.makeTypeSelect = function(pname){
+		var userId = (sessionStorage['moms_id']).substring(1,3);
+
+		if(userId == 'es'){					// 초등
+			return {
+				'02' : select_jiyuk[0] + select_jiyuk[2] ,
+				'03' : select_miyuk[0] + select_miyuk[2] ,
+				'04' : select_physic[0]
+			}[pname]
+		}else if(userId == 'ms'){			// 중등
+			return {
+				'02' : select_jiyuk[1] + select_jiyuk[2] ,
+				'03' : select_miyuk[1] + select_miyuk[2],
+				'04' : select_physic[1]
+			}[pname]
+		}else{								// 예외의 경우 중등으로 세팅
+			return {
+				'02' : select_jiyuk[1] + select_jiyuk[2] ,
+				'03' : select_miyuk[1] + select_miyuk[2],
+				'04' : select_physic[1]
+			}[pname]
+		}
+	}
+
+
+	// 페이지코드 (메뉴에 따른 코드 return)
+	momsSubTempFrame.statistic.pageCode = function(pname){
+		return {
+            '01' : '1',
+            '02' : '2',
+			'03' : '3',
+			'04' : '4',
+			'05' : '5',
+        }[pname]
+	}
+
+
+	// 차트 start
+	momsSubTempFrame.statistic.startChart = function(data){
+        var chartData = eval(data);
+
+		$('#chartType1').hide();
+        $('#chartType2').hide();
+        $('#chartType3').hide();
+        $('#chartType4').hide();
+
+
+		try{
+            var r_chartData = eval(data+'_R');
+            momsSubTempFrame.statistic.makeChart3(r_chartData);	// 방사형
+
+            momsSubTempFrame.statistic.chartReset();
+			$('#chartLayer3 ul').css({'display':'inline-block'});
+            $('#chartType3').show();
+            $('#chartType3').addClass('on');
+			$('#chartLayer3').addClass('sizeAuto');
+            //$('#chartLayer3').css('visibility','visible');
+        }catch (e){
+            console.error(e);
+        }
+
+        try{
+            var d_chartData = eval(data+'_D');
+            $('#chartType4').show();
+            momsSubTempFrame.statistic.makeChart4(d_chartData);	// 도넛
+        }catch (e){
+            console.error(e);
+        }
+
+        try {
+            momsSubTempFrame.statistic.makeChart2(chartData);			// 라인
+            momsSubTempFrame.statistic.makeChart1(chartData);			// 바
+
+            $('#chartType1').show();
+            $('#chartType2').show();
+            momsSubTempFrame.statistic.chartReset();
+            $('#chartType1').addClass('on');
+			$('#chartLayer1').addClass('sizeAuto');
+            //$('#chartLayer1').css('visibility','visible');
+        } catch (e){
+            console.error(e);
+        }
+	}
+
+	// 차트 리셋
+	momsSubTempFrame.statistic.chartReset = function(){
+		$('#chartLayer3 ul').css({'display':'none'});
+		$('#chartType1, #chartType2, #chartType3, #chartType4').removeClass('on');
+        $('#chartLayer1 , #chartLayer2 ,#chartLayer3, #chartLayer4').css('visibility','hidden');
+
+	}
+
+
+	// 차트 1 - bar
+	momsSubTempFrame.statistic.makeChart1 = function(data){
+		var ctx = document.getElementById("grp-bar").getContext("2d");
+        if(window.myBar){
+            window.myBar.destroy();
+        }
+        window.myBar = new Chart(ctx).Bar(data, {
+			responsive : true,
+			animation : false
+		});
+	}
+
+
+	// 차트 2 - line
+	momsSubTempFrame.statistic.makeChart2 = function(data){
+		var ctx = document.getElementById("grp-line").getContext("2d");
+        if(window.myLine){
+            window.myLine.destroy();
+        }
+        window.myLine = new Chart(ctx).Line(data, {
+			responsive: true,
+			bezierCurve : false,
+			datasetFill : false,
+			scaleBeginAtZero : true,
+			animation : false
+		});
+	}
+
+
+	// 차트 3 - radar
+	momsSubTempFrame.statistic.makeChart3 = function(data){
+		var ctx = document.getElementById("grp-radar").getContext("2d");
+        if(window.myRadar){
+            window.myRadar.destroy();
+        }
+        window.myRadar = new Chart(ctx).Radar(data, {
+			responsive : true,
+			animation : false,
+			pointLabelFontSize : 15
+		});
+	}
+
+
+	// 차트 4 - donut
+	momsSubTempFrame.statistic.makeChart4 = function(data){
+		var ctx = document.getElementById("grp-donut").getContext("2d");
+        if(window.myDoughnut){
+            window.myDoughnut.destroy();
+        }
+		//highlight
+		console.log("data" , data)
+        window.myDoughnut = new Chart(ctx).Doughnut(data, {
+			responsive : true,
+			animation : false
+		});
+	}
+
+
+	// 이벤트 바인드
+	momsSubTempFrame.statistic.eventBind = function(){
+
+		// 조회하기
+        $('#makeChart').on(BIND_EVENT_TYPE,function(){
+			var userId = (sessionStorage['moms_id']).substring(1,3);
+
+			if(userId == 'es'){				// 학생코드 1104
+				var chartCode = 'a_' + momsSubTempFrame.statistic.pageCode(momsSubTempFrame.statistic.pname) + '1104';
+			}else if(userId == 'ms'){		// 학생코드 2119
+				var chartCode = 'a_' + momsSubTempFrame.statistic.pageCode(momsSubTempFrame.statistic.pname) + '2119';
+			}else{							// 예외의 경우 2110으로 세팅
+				var chartCode = 'a_' + momsSubTempFrame.statistic.pageCode(momsSubTempFrame.statistic.pname) + '2110';
+			}
+
+
+			var	selects = $('#selectLayer').find('select');
+
+            for(var i  = 0; i < selects.length; i++){
+                chartCode += $(selects[i]).val();
+            }
+
+			momsSubTempFrame.statistic.chartReset();
+			//$('#chartLayer1').css('visibility','visible');
+			//$('#chartLayer1').addClass('sizeAuto');
+			$('.sizeAuto').removeClass('sizeAuto');
+			$('#chartType1').addClass('on');
+			momsSubTempFrame.statistic.startChart(chartCode);
+        });
+
+        /*
+		$('#chartType1').on(BIND_EVENT_TYPE,function(){
+            momsSubTempFrame.statistic.chartReset();
+            $(this).addClass('on');
+			//$('#chartLayer1').css('visibility','visible');
+        });
+        $('#chartType2').on(BIND_EVENT_TYPE,function(){
+            momsSubTempFrame.statistic.chartReset();
+            $(this).addClass('on');
+			//$('#chartLayer2').css('visibility','visible');
+        });
+		$('#chartType3').on(BIND_EVENT_TYPE,function(){
+            momsSubTempFrame.statistic.chartReset();
+            $(this).addClass('on');
+			//$('#chartLayer3').css('visibility','visible');
+        });
+        $('#chartType4').on(BIND_EVENT_TYPE,function(){
+            momsSubTempFrame.statistic.chartReset();
+            $(this).addClass('on');
+			//$('#chartLayer4').css('visibility','visible');
+        });
+		*/
+
+
+		// 미육 과목 select change 이벤트
+		$('#miyuk_subject').on('change',function(){
+			var selectLayer = $('#selectLayer'),
+                thisVal =  $(this).val();
+
+			selectLayer.find('select').eq(1).remove();
+
+			if(thisVal == 1){
+				selectLayer.append(select_miyuk[2]);
+			}
+			if(thisVal == 2){
+				selectLayer.append(select_miyuk[3]);
+			}
+		});
+
+		// 체육 과목 select change 이벤트
+		$('#physic_subject').on('change',function(){
+			var selectLayer = $('#selectLayer'),
+                thisVal =  $(this).val();
+
+			selectLayer.find('select').eq(1).remove();
+
+			if(thisVal == 2){
+				selectLayer.append(select_physic[2]);
+			}
+		});
+
+
+		$('.chart_icon > a').click(function() {
+			momsSubTempFrame.statistic.chartReset();
+			$(this).addClass('on');
+
+			var idx = $('.chart_icon > a').index(this);
+			$('.injection > div').removeClass('sizeAuto');
+			$('.injection > div').eq(idx).addClass('sizeAuto');
+		});
+
+		//$('#makeChart').click();
+	}
+
+
+	momsSubTempFrame.statistic.init();
+
+
+
+	function randomRgbColor(){
+		var rgb =  [ '239,63,74', '243,113,139', '255,213,4', '128,181,99', '37,170,226', '75,185,186', '157,126,185', '248,149,82', '254,204,79'];
+		return 'rgba('+ rgb[parseInt(Math.floor(Math.random() * 8))] +',0.8)';
+	}
+
+	function randomColor(){
+		var hex = [ '#ef3f4a', '#f3718b', '#ffd504', '#80b563', '#25aae2', '#4bb9ba', '#9d7eb9', '#f89552', '#fecc4f' ];
+		return hex[parseInt(Math.floor(Math.random() * 8))];
+	}

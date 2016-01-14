@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="tch">
+
+	<select id="getStudentInfo" resultType="com.digital.tch.china.vo.User"
+		parameterType="com.digital.tch.china.vo.User">
+		SELECT *
+		FROM t_user
+		WHERE user_id = (
+		SELECT b.user_id
+		FROM t_user
+		a,t_student_parents b
+		WHERE a.user_id=#{user_id} AND
+		a.user_id =
+		b.parent_id )
+	</select>
+
+	<select id="getUserInfo" resultType="com.digital.tch.china.vo.User"
+		parameterType="com.digital.tch.china.vo.User">
+		SELECT
+		*
+		FROM v_pcm_userinfo
+		WHERE user_id =
+		BINARY(#{user_id})
+	</select>
+
+	<select id="getNoticeList" resultType="com.digital.tch.china.vo.Notice"
+		parameterType="com.digital.tch.china.vo.SearchCondition">
+
+		SELECT (select code_name from t_code where
+		code_id=a.speaker and
+		code_group=23 ) as
+		speaker,a.*,ifnull(C.nread_id,0) as new_cnt
+		FROM
+		t_notice a left join
+		t_notice_read C on ( a.nid = C.nid and
+		C.user_id=#{user_id}),t_user b
+		WHERE a.scid=b.scid AND ( a.target like
+		'%S%' or a.target like '%P%' )
+		AND b.user_id=#{user_id}
+		ORDER BY a.reg_date desc
+		LIMIT
+		#{currentPage},#{recordCnt}
+	</select>
+	
+	<select id="getNoticeFileList" resultType="com.digital.tch.china.vo.NoticeFile"
+		parameterType="com.digital.tch.china.vo.Notice">
+
+		SELECT *
+		FROM t_notice_file
+		WHERE nid = #{nid}
+	</select>
+	
+	<select id="getAlarmList" resultType="com.digital.tch.china.vo.Alarm"
+		parameterType="com.digital.tch.china.vo.SearchCondition">
+
+		SELECT
+		a.aid,a.title,a.user_id,a.reg_date,ifnull(C.aid,0) as
+		new_cnt,e.subject,
+		IFNULL((select code_name from t_code where
+		code_group='02' and code_id=e.subject),'班主任') as
+		subject_name,d.user_name
+		FROM t_alarm a left join t_alarm_read C on (
+		a.aid = C.aid and C.user_id=#{user_id} ) ,t_alarm_students b,
+		(
+		SELECT
+		b.user_id,a.reg_date
+		FROM t_user a,t_student_parents b
+		WHERE
+		a.user_id=#{user_id} AND a.user_id = b.parent_id ) m,t_user
+		d,t_alarm_class e
+		WHERE a.aid =b.aid AND b.user_id=m.user_id
+		AND
+		a.aid=e.aid
+		AND a.user_id = d.user_id AND a.is_delete='N' and
+		a.reg_date > m.reg_date
+		ORDER BY a.reg_date desc
+
+		LIMIT
+		#{currentPage},#{recordCnt}
+	</select>
+	
+	<select id="getAlarmInfo" resultType="com.digital.tch.china.vo.Alarm"
+		parameterType="com.digital.tch.china.vo.Alarm">
+		SELECT a.*,d.user_name
+		FROM t_alarm a,t_user d
+		WHERE a.aid
+		= #{aid} and a.user_id = d.user_id
+		and d.is_delete='N'
+	</select>
+	
+	<select id="getAlarmFileList" resultType="com.digital.tch.china.vo.AlarmFile"
+		parameterType="com.digital.tch.china.vo.Alarm">
+
+		SELECT *
+		FROM t_alarm_file
+		WHERE aid = #{aid}
+	</select>
+
+	<insert id="insertNoticeRead" parameterType="com.digital.tch.china.vo.SearchCondition">
+		INSERT INTO
+		t_notice_read ( nid,user_id )
+		VALUES(
+		#{key},#{user_id})
+	</insert>
+	
+	<insert id="insertAlarmRead" parameterType="com.digital.tch.china.vo.SearchCondition">
+		INSERT INTO
+		t_alarm_read ( aid,user_id )
+		VALUES(
+		#{key},#{user_id})
+	</insert>
+	
+	<insert id="insertParentQaRead" parameterType="com.digital.tch.china.vo.SearchCondition">
+		INSERT INTO
+		t_parent_qa_read ( pqaid,user_id )
+		VALUES(
+		#{key},#{user_id})
+	</insert>
+
+	<select id="getAccessToken" resultType="com.digital.tch.china.vo.AccessToken">
+		SELECT *
+		FROM
+		t_weixin_access_token
+		LIMIT 1
+	</select>
+
+	<insert id="insertAccessToken" parameterType="com.digital.tch.china.vo.AccessToken">
+		INSERT INTO
+		t_weixin_access_token (
+		access_token,expires_in,up_date )
+		VALUES(
+		#{access_token},#{expires_in},now())
+	</insert>
+
+	<update id="updateAccessToken" parameterType="com.digital.tch.china.vo.AccessToken">
+		UPDATE
+		t_weixin_access_token SET
+		access_token
+		=#{access_token},expires_in
+		=#{expires_in},up_date=now()
+	</update>
+
+	<select id="getWXUserInfo" resultType="com.digital.tch.china.vo.WXUserInfo"
+		parameterType="com.digital.tch.china.vo.WXUserInfo">
+		SELECT *
+		FROM t_weixin_user
+		WHERE wx_user_id =
+		#{wx_user_id}
+		LIMIT 1
+	</select>
+
+	<insert id="insertAuthorize" parameterType="com.digital.tch.china.vo.WXUserInfo">
+		INSERT INTO
+		t_weixin_user (
+		user_id,user_type,wx_user_id,device_id,ins_date )
+		VALUES(
+		#{user_id},#{user_type},#{wx_user_id},#{device_id},now())
+	</insert>
+
+	<update id="updateAuthorize" parameterType="com.digital.tch.china.vo.WXUserInfo">
+		UPDATE t_weixin_user
+		SET
+		user_id
+		=#{user_id},user_type
+		=#{user_type},device_id
+		=#{device_id},up_date=now()
+		WHERE wx_user_id =
+		#{wx_user_id}
+	</update>
+
+	<select id="getNoticeInfo" resultType="com.digital.tch.china.vo.Notice"
+		parameterType="com.digital.tch.china.vo.SearchCondition">
+		SELECT (select code_name from t_code where
+		code_id=a.speaker and code_group=23 ) as speaker,a.*
+		FROM t_notice a
+		WHERE nid = #{nid}
+	</select>
+
+	<select id="getAlarmListBySubjectTeacher" resultType="com.digital.tch.china.vo.Alarm"
+		parameterType="java.util.HashMap">
+		SELECT
+		alarm.aid
+		,alarm.user_id
+		,alarm.title
+		,alarm.reg_date
+		,alarmClass.acid
+		,alarmClass.school_year AS target_school_year
+		,alarmClass.class_no AS target_class_no
+		,alarmClass.subject AS
+		subject_id
+		,userInfo.school_year
+		,userInfo.class_no
+		,userInfo.user_name
+		,IFNULL(codeInfo.code_name,"") AS subject_name
+		,CONCAT('[',GROUP_CONCAT('"',alarmClass.school_year,'-',alarmClass.class_no,'"')
+		,']') AS targetClass
+		,IF((SELECT COUNT(afid) FROM t_alarm_file WHERE
+		aid = alarm.aid ) = 0 ,
+		"false","true") as isFile
+		,ifnull(tar.aid,0) AS
+		new_cnt
+		FROM t_alarm AS alarm
+		INNER JOIN t_user AS userInfo ON
+		userInfo.user_id =
+		alarm.user_id
+		LEFT JOIN t_alarm_class as alarmClass
+		ON alarmClass.aid = alarm.aid
+		LEFT JOIN t_code AS codeInfo ON
+		(codeInfo.code_group = '02' AND
+		alarmClass.subject = codeInfo.code_id)
+		LEFT JOIN t_alarm_read AS tar ON
+		tar.aid = alarmClass.aid
+		WHERE 1=1
+		AND
+		alarm.is_delete = 'N'
+		AND
+		userInfo.scid = #{scid}
+		AND alarm.user_id =
+		#{user_id}
+		AND alarmClass.subject = "00"
+		<if test="school_year != null">
+			AND alarmClass.school_year = #{school_year}
+		</if>
+		GROUP BY alarm.aid,alarmClass.subject
+		ORDER BY alarm.reg_date DESC
+		LIMIT
+		#{currentPage},#{recordCnt}
+	</select>
+
+	<select id="getUserFromWX" resultType="com.digital.tch.china.vo.User"
+		parameterType="com.digital.tch.china.vo.User">
+		SELECT
+		*
+		FROM t_user
+		WHERE user_id = #{user_id}and user_pw
+		= #{user_pw} and scid!=0 and user_type=#{user_type}
+	</select>
+
+    <select id="getAddressBookStudentsList" resultType="com.digital.tch.china.vo.User" parameterType="java.util.HashMap">
+		SELECT
+			scid
+			,student_no
+			,user_id
+			,user_name
+			,user_email
+			,sex
+			,photo_path
+			,school_year
+			,class_no
+		FROM t_user AS userInfo
+		WHERE 1=1
+		AND userInfo.is_delete ='N'
+		AND userInfo.scid = #{scid}
+		AND userInfo.school_year = #{school_year}
+		AND userInfo.class_no = #{class_no}
+	</select>
+	
+	<insert id="addAlarm" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="aid">
+		INSERT INTO t_alarm( 
+			title
+	    	,memo
+	    	,user_id
+		)VALUES(
+			#{title}
+			,#{memo}
+			,#{user_id}
+		)
+	</insert>
+	
+	<insert id="addAlarmClass" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="acid">
+		INSERT INTO t_alarm_class( 
+			aid
+	    	,subject
+	    	,school_year
+	    	,class_no
+		)VALUES(
+			#{aid}
+			,#{subject_id}
+			,#{school_year}
+			,#{class_no}
+		)
+	</insert>
+	
+	<insert id="addAlarmFile" parameterType="java.util.HashMap" useGeneratedKeys="true" keyProperty="afid">
+		INSERT INTO t_alarm_file( 
+			aid
+	    	,filename
+	    	,filepath
+		)VALUES(
+			#{aid}
+			,#{file_name}
+			,#{file_path}
+		)
+	</insert>
+	
+	<insert id="addAlarmToStudents"  parameterType="java.util.HashMap">
+		INSERT INTO t_alarm_students(
+			aid
+    		,user_id
+		)VALUES(
+			#{aid}
+    		,#{user_id}
+		)
+	</insert>
+
+	<select
+		id="getTchNoticeList"
+		resultType="com.digital.tch.china.vo.Notice"
+		parameterType="java.util.HashMap">
+		SELECT
+		*
+		FROM(
+		SELECT
+		notice.nid
+		,notice.scid
+		,IFNULL(notice.title,"") AS title
+		,IFNULL(notice.user_id,"") AS user_id
+		,IFNULL(notice.target,"") AS target
+		,notice.reg_date
+		,IFNULL(code.code_name,"") AS speaker
+		,noticeRead.nread_id
+		,IF(noticeRead.user_id IS NULL ,"0","1") AS new_cnt
+		,IF((SELECT
+		COUNT(nid) FROM t_notice_file WHERE nid = notice.nid) > 0 ,
+		"true","false") AS file_added
+		FROM t_notice AS notice
+		INNER JOIN t_code
+		AS code ON code.code_group = '23' AND notice.speaker =
+		code_id
+		LEFT JOIN
+		t_notice_read AS noticeRead ON (
+		noticeRead.nid = notice.nid
+		AND
+		noticeRead.user_id = (
+		SELECT
+		user_id
+		FROM t_user
+		WHERE is_delete = 'N'
+		AND scid = #{scid}
+		AND user_id = #{user_id}
+		)
+		)
+		WHERE 1=1
+		AND scid =
+		#{scid}
+		AND (target like CONCAT('%', 'T', '%') )
+		) AS notice
+		WHERE 1=1
+		ORDER BY
+		notice.reg_date DESC
+		LIMIT #{currentPage} , #{recordCnt}
+	</select>
+
+</mapper>

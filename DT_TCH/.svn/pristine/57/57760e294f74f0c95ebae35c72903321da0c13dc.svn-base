@@ -1,0 +1,67 @@
+//on message
+var callcnt =0;
+var state = "";
+var option = {
+	url : 'http://localhost/test.php',
+	delay : 1500,
+	params : { }
+}
+
+
+self.onmessage = workerOnmessage;
+
+function workerOnmessage(event){
+	var arg = JSON.parse(event.data);
+	state = arg.type;
+	if(arg.type =="setoption"){
+		option.url = arg.data.url || option.url;
+		option.params = arg.data.params || option.params;
+		//console.info('옵션을 세팅합니다.' , arg , arg.data.url);
+	}else if(arg.type == "stop"){
+		//console.info("[ 멈춥니다!!!!!!! ]");
+		//self.onmessage = workerOnmessage;
+	}else{
+		//sleep(option.delay);
+		callcnt++;
+		requestApi();
+	}
+};
+
+
+
+function requestApi(){
+	var xhr = new XMLHttpRequest(); //요청시마다 인스턴스 화?
+	var params = "?user_id="+option.params.user_id;
+	xhr.onreadystatechange = function(){
+		if ((xhr.readyState == 4) && (xhr.status == 200)) {
+			//console.info('[WEBWORKER AJAX CALL SUCCESS]' , xhr);
+			//console.info("doing callcnt: "+ callcnt);
+			self.postMessage( JSON.stringify(xhr.response) );
+		}
+	};//콜백 함수  등록
+    xhr.open("POST", option.url+params , true );//연결
+	xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.send(null);//전송
+}
+
+
+
+
+//Sleep
+function sleep(milliSeconds){  
+  var startTime = new Date().getTime(); // get the current time   
+  while (new Date().getTime() < startTime + milliSeconds); // hog cpu 
+} 
+
+
+function ObjToQuery(object){
+	var result = "";
+	var cnt = false;
+	for(var key in object){
+		if(cnt) result += "&"
+		result += key+"="+object[key];
+		cnt=true;
+	};
+	return result ;
+}

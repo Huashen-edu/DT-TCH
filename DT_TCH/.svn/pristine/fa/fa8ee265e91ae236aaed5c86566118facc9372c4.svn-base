@@ -1,0 +1,76 @@
+package com.digital.tch.china.vo;
+
+import java.util.List;
+
+public class Alarm {
+	private String user_id;
+	public String getUser_id() {
+		return user_id;
+	}
+	public void setUser_id(String user_id) {
+		this.user_id = user_id;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getMemo() {
+		return memo;
+	}
+	public void setMemo(String memo) {
+		this.memo = memo;
+	}
+	public String getReg_date() {
+		return reg_date;
+	}
+	public void setReg_date(String reg_date) {
+		this.reg_date = reg_date;
+	}
+	public int getAid() {
+		return aid;
+	}
+	public void setAid(int aid) {
+		this.aid = aid;
+	}
+	private String title;
+	private String memo;
+	private String reg_date;
+	private int aid;
+	private int new_cnt;
+	public int getNew_cnt() {
+		return new_cnt;
+	}
+	public void setNew_cnt(int new_cnt) {
+		this.new_cnt = new_cnt;
+	}
+	private List<AlarmFile> fileList;
+	public List<AlarmFile> getFileList() {
+		return fileList;
+	}
+	public void setFileList(List<AlarmFile> fileList) {
+		this.fileList = fileList;
+	}
+	private String subject;
+	public String getSubject() {
+		return subject;
+	}
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+	public String getSubject_name() {
+		return subject_name;
+	}
+	public void setSubject_name(String subject_name) {
+		this.subject_name = subject_name;
+	}
+	private String subject_name;
+	private String user_name;
+	public String getUser_name() {
+		return user_name;
+	}
+	public void setUser_name(String user_name) {
+		this.user_name = user_name;
+	}
+}
